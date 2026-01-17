@@ -1,0 +1,14 @@
+{
+  "dialogueID": "intro",
+  "nodes": {
+    "start": { 
+      "speaker": "Narrator", 
+      "text": "Hello.", 
+      "nextNodeId": "end" 
+    },
+    "end": { 
+      "speaker": "", 
+      "text": "" 
+    }
+  }
+}
