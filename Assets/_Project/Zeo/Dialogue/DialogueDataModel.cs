@@ -2,6 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Dialogue framwork 
+Sample JSON:
+{
+  "dialogueID": "intro",
+  "nodes": {
+    "start": { 
+      "speaker": "Narrator", 
+      "text": "Hello.", 
+      "commands": [
+        {
+          "command": "playSound",
+          "args": ["hello.wav"]
+        }
+      ],
+      "choices": [
+        {
+          "text": "Continue",
+          "nextNodeId": "end"
+        }
+      ],
+      "nextNodeId": "end" 
+    },
+    "end": { 
+      "speaker": "", 
+      "text": "" 
+    }
+  }
+}
+*/
+
 [System.Serializable]
 public class DialogueDataModel 
 {

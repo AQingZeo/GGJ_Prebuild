@@ -2,17 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IInteractable : MonoBehaviour
+/// <summary>
+/// Interface for objects that can be interacted with.
+/// Implement this interface on any GameObject that should respond to player interaction.
+/// </summary>
+public interface IInteractable
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    /// <summary>
+    /// Check if this object can currently be interacted with.
+    /// </summary>
+    /// <returns>True if interaction is possible, false otherwise</returns>
+    bool CanInteract();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    /// <summary>
+    /// Perform the interaction action.
+    /// Called by InteractionController when the player interacts with this object.
+    /// </summary>
+    void Interact();
 }

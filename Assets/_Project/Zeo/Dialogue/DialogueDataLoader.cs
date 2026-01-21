@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 
+//Load Dialogue Data from JSON file
+
 public class DialogueDataLoader
 {
     public DialogueDataModel Load(string dialogueId)
