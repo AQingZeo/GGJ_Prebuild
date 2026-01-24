@@ -1,18 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 
-public class EventBus : MonoBehaviour
+public static class EventBus
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    // Zeo 射线点到物体时调用。
+    public static Action<string> OnInteractionTriggered;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    // Echo对话结束时调用，告诉 Zeo 恢复玩家控制。
+    public static Action OnDialogueEnded;
 }
