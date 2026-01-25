@@ -1,10 +1,33 @@
 using System;
+using System.Collections.Generic;
 
 public static class EventBus
 {
-    // Zeo 射线点到物体时调用。
-    public static Action<string> OnInteractionTriggered;
+    private static readonly Dictionary<Type, List<object>> _subscribers = new Dictionary<Type, List<object>>();
 
-    // Echo对话结束时调用，告诉 Zeo 恢复玩家控制。
-    public static Action OnDialogueEnded;
+    public static void Subscribe<T>(Action<T> handler)
+    {
+        Type type = typeof(T);
+        if (!_subscribers.ContainsKey(type)) _subscribers[type] = new List<object>();
+        _subscribers[type].Add(handler);
+    }
+
+    public static void Unsubscribe<T>(Action<T> handler)
+    {
+        Type type = typeof(T);
+        if (_subscribers.ContainsKey(type)) _subscribers[type].Remove(handler);
+    }
+
+    public static void Publish<T>(T eventData)
+    {
+        Type type = typeof(T);
+        if (_subscribers.ContainsKey(type))
+        {
+            var handlers = new List<object>(_subscribers[type]);
+            foreach (var handler in handlers)
+            {
+                ((Action<T>)handler)?.Invoke(eventData);
+            }
+        }
+    }
 }

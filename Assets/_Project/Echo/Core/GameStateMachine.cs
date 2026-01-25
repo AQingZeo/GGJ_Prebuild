@@ -1,29 +1,36 @@
 using UnityEngine;
+using GameContracts;
 
 public class GameStateMachine : MonoBehaviour
 {
-    public static GameStateMachine Instance;
 
-    public enum GameState { Explore, Dialogue, Pause }
-    public GameState CurrentState = GameState.Explore;
+    public static GameStateMachine Instance { get; private set; }
+
+    public GameState CurrentState { get; private set; }
+    public GameState PreviousState { get; private set; }
 
     private void Awake()
     {
-        // 经典的单例模式，方便随时访问
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // 跨场景不销毁
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        CurrentState = GameState.Explore;
     }
 
-    public void ChangeState(GameState newState)
+    public void SetState(GameState newState)
     {
+        if (newState == CurrentState) return;
+
+        PreviousState = CurrentState;
         CurrentState = newState;
-        Debug.Log($"<color=yellow>[State] 游戏状态切换至: {newState}</color>");
+
+        Debug.Log($"<color=orange>【状态机】状态切换: {PreviousState} -> {CurrentState}</color>");
+
+        EventBus.Publish(new GameStateChanged(PreviousState, CurrentState));
+    }
+
+    public void ReturnToPreviousState()
+    {
+        SetState(PreviousState);
     }
 }

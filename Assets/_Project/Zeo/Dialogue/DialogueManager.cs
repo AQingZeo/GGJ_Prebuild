@@ -1,18 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using TMPro;
+using GameContracts; 
 
 public class DialogueManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public GameObject dialogueBox;
+    public TextMeshProUGUI contentText;
+
+    // --- 1. 订阅新版的 EventBus ---
+    private void OnEnable()
     {
-        
+        EventBus.Subscribe<InteractionEvent>(HandleInteraction);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        EventBus.Unsubscribe<InteractionEvent>(HandleInteraction);
+    }
+
+    private void HandleInteraction(InteractionEvent evt)
+    {
+        dialogueBox.SetActive(true);
+        contentText.text = "收到物体ID: " + evt.ID;
+
+        // old: ChangeState(GameStateMachine.GameState.Dialogue)
+        // new: SetState(GameState.Dialogue)
+        GameStateMachine.Instance.SetState(GameState.Dialogue);
     }
 }
