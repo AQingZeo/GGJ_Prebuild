@@ -32,7 +32,6 @@ public class InteractionControllerSmokeTest : MonoBehaviour
 {
     [Header("Test Configuration")]
     [SerializeField] private bool runOnStart = true;
-    [SerializeField] private bool createMocks = true;
 
     [Header("Component References")]
     [SerializeField] private InteractionController interactionController;
@@ -47,7 +46,6 @@ public class InteractionControllerSmokeTest : MonoBehaviour
     private int passCount = 0;
     private int failCount = 0;
     private bool testInProgress = false;
-    private GameState currentTestState = GameState.Explore;
 
     private void Awake()
     {

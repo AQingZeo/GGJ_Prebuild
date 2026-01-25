@@ -89,6 +89,7 @@ public class ChoiceUIController : MonoBehaviour
 
     /// <summary>
     /// Create a default button prefab if none is assigned.
+    /// To customize button appearance, edit the values below or create your own prefab in Unity.
     /// </summary>
     private void CreateDefaultButtonPrefab()
     {
@@ -98,23 +99,24 @@ public class ChoiceUIController : MonoBehaviour
         buttonObj.transform.SetParent(null);
         DontDestroyOnLoad(buttonObj); // Keep it across scenes
 
-        // Add RectTransform
+        // ===== BUTTON SIZE AND LAYOUT =====
         RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(400, 60);
+        rectTransform.sizeDelta = new Vector2(450, 70); // Width x Height
 
-        // Add Image (Button background)
+        // ===== BUTTON BACKGROUND COLOR =====
         Image buttonImage = buttonObj.AddComponent<Image>();
-        buttonImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+        buttonImage.color = new Color(0.15f, 0.15f, 0.2f, 0.9f); // Dark blue-grey
 
-        // Add Button component
+        // ===== BUTTON INTERACTION COLORS =====
         Button button = buttonObj.AddComponent<Button>();
         ColorBlock colors = button.colors;
-        colors.normalColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-        colors.highlightedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
-        colors.pressedColor = new Color(0.1f, 0.1f, 0.1f, 1f);
+        colors.normalColor = new Color(0.15f, 0.15f, 0.2f, 0.9f);     // Default state
+        colors.highlightedColor = new Color(0.25f, 0.3f, 0.4f, 1f);   // Mouse hover
+        colors.pressedColor = new Color(0.1f, 0.1f, 0.15f, 1f);       // Clicked
+        colors.selectedColor = new Color(0.2f, 0.25f, 0.35f, 1f);     // Selected
         button.colors = colors;
 
-        // Add Text (Button label)
+        // ===== BUTTON TEXT (CHILD OBJECT) =====
         GameObject textObj = new GameObject("Text");
         textObj.transform.SetParent(buttonObj.transform, false);
         RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -123,11 +125,13 @@ public class ChoiceUIController : MonoBehaviour
         textRect.sizeDelta = Vector2.zero;
         textRect.anchoredPosition = Vector2.zero;
 
+        // ===== TEXT APPEARANCE =====
         TMP_Text buttonText = textObj.AddComponent<TextMeshProUGUI>();
         buttonText.text = "Choice";
-        buttonText.fontSize = 18;
-        buttonText.alignment = TextAlignmentOptions.Center;
-        buttonText.color = Color.white;
+        buttonText.fontSize = 22;                                  // Font size
+        buttonText.alignment = TextAlignmentOptions.Center;        // Text alignment
+        buttonText.color = new Color(0.95f, 0.95f, 1f, 1f);       // Off-white
+        buttonText.fontStyle = FontStyles.Normal;                  // Style (Normal, Bold, Italic)
 
         // Set as prefab reference (this will be used as template)
         choiceButtonPrefab = buttonObj;

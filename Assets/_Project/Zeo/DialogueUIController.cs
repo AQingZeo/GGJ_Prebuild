@@ -16,8 +16,9 @@ public class DialogueUIController : MonoBehaviour
     [SerializeField] private TypewriterEffect typewriterEffect;
 
     [Header("Settings")]
-    [SerializeField] private float maxLinesProportion = 0.3f; // Max 30% of screen height for dialogue text
+    [SerializeField] private float maxLinesProportion = 0.4f; // Max 40% of screen height for dialogue text
     [SerializeField] private float lineSpacing = 1.2f;
+    [SerializeField] private bool constrainTextBounds = true; // Ensure text stays within bounds
 
     private Canvas canvas;
     private RectTransform dialogueTextRect;
@@ -27,7 +28,6 @@ public class DialogueUIController : MonoBehaviour
 
     private void Awake()
     {
-        // Auto-find components if not assigned
         if (dialoguePanel == null)
             dialoguePanel = gameObject;
 
@@ -39,7 +39,6 @@ public class DialogueUIController : MonoBehaviour
 
         if (typewriterEffect == null && dialogueText != null)
         {
-            // Add TypewriterEffect if it doesn't exist
             typewriterEffect = dialogueText.gameObject.AddComponent<TypewriterEffect>();
         }
 
@@ -52,6 +51,13 @@ public class DialogueUIController : MonoBehaviour
         {
             dialogueTextRect = dialogueText.GetComponent<RectTransform>();
             baseFontSize = dialogueText.fontSize;
+            
+            // Ensure text is constrained to bounds
+            if (constrainTextBounds && dialogueTextRect != null)
+            {
+                dialogueText.overflowMode = TextOverflowModes.Truncate;
+                dialogueText.enableWordWrapping = true;
+            }
         }
 
         // Calculate max visible lines based on screen proportion
@@ -94,7 +100,10 @@ public class DialogueUIController : MonoBehaviour
     /// Display a dialogue line with speaker name and text.
     /// Called by DialogueManager to show dialogue content.
     /// </summary>
-    public void ShowLine(string speaker, string text)
+    /// <param name="speaker">Speaker name</param>
+    /// <param name="text">Dialogue text</param>
+    /// <param name="onComplete">Optional callback when typewriter completes</param>
+    public void ShowLine(string speaker, string text, System.Action onComplete = null)
     {
         if (dialoguePanel != null)
         {
@@ -124,13 +133,14 @@ public class DialogueUIController : MonoBehaviour
         {
             if (typewriterEffect != null)
             {
-                // Use typewriter effect
-                typewriterEffect.StartTyping(displayText);
+                // Use typewriter effect with callback
+                typewriterEffect.StartTyping(displayText, onComplete);
             }
             else
             {
-                // Fallback: show text immediately
+                // Fallback: show text immediately and call callback
                 dialogueText.text = displayText;
+                onComplete?.Invoke();
             }
         }
     }

@@ -121,8 +121,11 @@ public class DialogueManager : MonoBehaviour
         // Set game state to Dialogue
         if (gameStateMachine != null)
         {
-            // Assuming GameStateMachine has a SetState method
-            // gameStateMachine.SetState(GameState.Dialogue);
+            previousState = gameStateMachine.GetState(); // Store current state
+            gameStateMachine.SetState(GameState.Dialogue);
+        }
+        else
+        {
             previousState = GameState.Explore; // Default previous state
         }
 
@@ -215,6 +218,18 @@ public class DialogueManager : MonoBehaviour
 
         DialogueChoice selectedChoice = currentNode.choices[choiceIndex];
 
+        // Clear choices immediately
+        if (choiceUIController != null)
+        {
+            choiceUIController.ClearChoices();
+        }
+
+        // Clear dialogue history for next node
+        if (dialogueUIController != null)
+        {
+            dialogueUIController.ClearHistory();
+        }
+
         // Execute choice commands
         if (selectedChoice.commands != null && selectedChoice.commands.Count > 0)
         {
@@ -229,7 +244,6 @@ public class DialogueManager : MonoBehaviour
         }
         else
         {
-            // No next node, end dialogue
             End();
         }
     }
@@ -263,13 +277,13 @@ public class DialogueManager : MonoBehaviour
         // Return to Explore state
         if (gameStateMachine != null)
         {
-            // Assuming GameStateMachine has a SetState method
-            // gameStateMachine.SetState(GameState.Explore);
+            gameStateMachine.SetState(previousState);
         }
     }
 
     /// <summary>
     /// Process the current node: display text, execute commands, show choices.
+    /// Choices are shown AFTER typewriter completes or is skipped.
     /// </summary>
     private void ProcessCurrentNode()
     {
@@ -286,32 +300,24 @@ public class DialogueManager : MonoBehaviour
             ExecuteCommands(node.commands);
         }
 
+        // Clear choices first (they'll be shown after typing completes)
+        if (choiceUIController != null)
+        {
+            choiceUIController.ClearChoices();
+        }
+
         // Display dialogue text
         if (dialogueUIController != null)
         {
-            dialogueUIController.ShowLine(node.speaker, node.text);
-        }
-
-        // Handle choices
-        if (node.choices != null && node.choices.Count > 0)
-        {
-            // Show choices
-            if (choiceUIController != null)
+            bool hasChoices = node.choices != null && node.choices.Count > 0;
+            
+            if (hasChoices)
             {
-                List<string> choiceTexts = new List<string>();
-                foreach (var choice in node.choices)
-                {
-                    choiceTexts.Add(choice.text);
-                }
-                choiceUIController.ShowChoices(choiceTexts);
+                dialogueUIController.ShowLine(node.speaker, node.text, () => ShowChoicesForCurrentNode());
             }
-        }
-        else
-        {
-            // No choices - clear choice UI
-            if (choiceUIController != null)
+            else
             {
-                choiceUIController.ClearChoices();
+                dialogueUIController.ShowLine(node.speaker, node.text);
             }
         }
 
@@ -320,6 +326,44 @@ public class DialogueManager : MonoBehaviour
         {
             // End node reached
             End();
+        }
+    }
+
+    [Header("Choice Settings")]
+    [SerializeField] private float choiceDelayAfterTypewriter = 0.3f; // Delay before showing choices (seconds)
+
+    /// <summary>
+    /// Show choices for the current dialogue node.
+    /// Called after typewriter completes. Includes a small delay.
+    /// </summary>
+    private void ShowChoicesForCurrentNode()
+    {
+        DialogueNode node = GetCurrentNode();
+        if (node == null) return;
+
+        if (node.choices != null && node.choices.Count > 0)
+        {
+            // Start coroutine to show choices after delay
+            StartCoroutine(ShowChoicesWithDelay(node.choices));
+        }
+    }
+
+    /// <summary>
+    /// Coroutine to show choices after a short delay.
+    /// </summary>
+    private IEnumerator ShowChoicesWithDelay(List<DialogueChoice> choices)
+    {
+        // Wait for the specified delay
+        yield return new WaitForSeconds(choiceDelayAfterTypewriter);
+
+        if (choiceUIController != null)
+        {
+            List<string> choiceTexts = new List<string>();
+            foreach (var choice in choices)
+            {
+                choiceTexts.Add(choice.text);
+            }
+                choiceUIController.ShowChoices(choiceTexts);
         }
     }
 
@@ -394,10 +438,32 @@ public class DialogueManager : MonoBehaviour
                 HandleWorldCommand(args);
                 break;
 
+            case "log":
+            case "print":
+            case "debug":
+                HandleLogCommand(args);
+                break;
+
             default:
                 Debug.LogWarning($"Unknown dialogue command: {command.command}");
                 break;
         }
+    }
+
+    /// <summary>
+    /// Handle log commands: ["message"] - prints message to console
+    /// Useful for debugging and testing command execution.
+    /// </summary>
+    private void HandleLogCommand(List<string> args)
+    {
+        if (args == null || args.Count < 1)
+        {
+            Debug.LogWarning("Log command requires at least 1 argument (message)");
+            return;
+        }
+
+        string message = string.Join(" ", args);
+        Debug.Log($"<color=cyan>[DialogueCommand]</color> {message}");
     }
 
     /// <summary>
@@ -420,21 +486,20 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        // Assuming FlagManager has SetFlag and GetFlag methods
         switch (operation)
         {
             case "set":
                 if (args.Count >= 3)
                 {
                     string value = args[2];
-                    // flagManager.SetFlag(flagName, value);
-                    Debug.Log($"Flag command: Set {flagName} = {value}");
+                    flagManager.SetFlag(flagName, value);
+                    Debug.Log($"<color=green>[Flag]</color> Set {flagName} = {value}");
                 }
                 break;
 
             case "get":
-                // object value = flagManager.GetFlag(flagName);
-                Debug.Log($"Flag command: Get {flagName}");
+                object flagValue = flagManager.GetFlag(flagName);
+                Debug.Log($"<color=green>[Flag]</color> Get {flagName} = {flagValue}");
                 break;
 
             default:
@@ -512,7 +577,7 @@ public class DialogueManager : MonoBehaviour
 
     /// <summary>
     /// Skip the typewriter effect and show full text immediately.
-    /// If typewriter is not active, advances to the next node.
+    /// If typewriter is not active and there are no choices, advances to the next node.
     /// </summary>
     public void SkipTypewriter()
     {
@@ -528,8 +593,16 @@ public class DialogueManager : MonoBehaviour
         }
         else
         {
-            // If not typing, advance to next node
-            Advance();
+            // Only advance if there are no choices (choices require explicit selection)
+            DialogueNode currentNode = GetCurrentNode();
+            bool hasChoices = currentNode != null && currentNode.choices != null && currentNode.choices.Count > 0;
+            
+            if (!hasChoices)
+            {
+                // If not typing and no choices, advance to next node
+                Advance();
+            }
+            // If there are choices, do nothing - wait for user to select a choice
         }
     }
 }

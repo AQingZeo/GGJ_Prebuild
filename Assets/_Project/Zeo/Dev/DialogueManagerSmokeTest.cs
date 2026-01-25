@@ -53,7 +53,6 @@ public class DialogueManagerSmokeTest : MonoBehaviour
     private int passCount = 0;
     private int failCount = 0;
     private bool testInProgress = false;
-    private GameState currentGameState = GameState.Explore;
 
     private void Awake()
     {
@@ -266,15 +265,28 @@ public class DialogueManagerSmokeTest : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // Try selecting a choice (may fail if no choices, which is OK)
+        bool selectChoiceSucceeded = false;
+        System.Exception selectChoiceException = null;
+        
         try
         {
             dialogueManager.SelectChoice(0);
-            yield return new WaitForSeconds(0.5f);
-            Pass("SelectChoice method exists and can be called");
+            selectChoiceSucceeded = true;
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[INFO] SelectChoice test: {e.Message} (This is OK if dialogue has no choices)");
+            selectChoiceException = e;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (selectChoiceSucceeded)
+        {
+            Pass("SelectChoice method exists and can be called");
+        }
+        else if (selectChoiceException != null)
+        {
+            Debug.LogWarning($"[INFO] SelectChoice test: {selectChoiceException.Message} (This is OK if dialogue has no choices)");
             Pass("SelectChoice method exists (no choices in test dialogue)");
         }
     }

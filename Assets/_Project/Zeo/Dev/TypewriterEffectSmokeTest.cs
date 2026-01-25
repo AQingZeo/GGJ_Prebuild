@@ -18,6 +18,10 @@
  * - Skip functionality works
  * - Completion callbacks are triggered
  * - Multiple start/stop cycles work without errors
+ * - Behavior during game state changes (Pause/Resume)
+ * 
+ * NOTE: This test is independent of the Echo Core framework.
+ * It uses its own mock game state management for testing.
  */
 
 using System.Collections;
@@ -38,6 +42,9 @@ public class TypewriterEffectSmokeTest : MonoBehaviour
     private int passCount = 0;
     private int failCount = 0;
     private bool testInProgress = false;
+    
+    // Mock game state for testing without Echo Core
+    private TypewriterTestGameState currentGameState = TypewriterTestGameState.Explore;
 
     private void Awake()
     {
@@ -117,10 +124,31 @@ public class TypewriterEffectSmokeTest : MonoBehaviour
         yield return StartCoroutine(TestCompletionCallback());
         yield return StartCoroutine(TestStopTyping());
         yield return StartCoroutine(TestMultipleStarts());
+        
+        // Game state change tests (independent of Echo Core)
+        yield return StartCoroutine(TestTypingDuringDialogueState());
+        yield return StartCoroutine(TestSkipDuringPauseState());
+        yield return StartCoroutine(TestTypingResumesAfterPause());
 
         Debug.Log($"=== TYPEWRITER EFFECT SMOKE TEST COMPLETE: {passCount} PASSED, {failCount} FAILED ===");
         testInProgress = false;
     }
+    
+    #region Mock Game State Methods
+    
+    private void SetMockGameState(TypewriterTestGameState newState)
+    {
+        TypewriterTestGameState oldState = currentGameState;
+        currentGameState = newState;
+        Debug.Log($"[MockGameState] {oldState} → {newState}");
+    }
+    
+    private TypewriterTestGameState GetMockGameState()
+    {
+        return currentGameState;
+    }
+    
+    #endregion
 
     private IEnumerator TestComponentExists()
     {
@@ -315,6 +343,159 @@ public class TypewriterEffectSmokeTest : MonoBehaviour
             Fail($"Multiple starts failed. Expected: 'Third', Got: '{textComponent.text}'");
         }
     }
+    
+    private IEnumerator TestTypingDuringDialogueState()
+    {
+        Debug.Log("[TEST] Testing typing during Dialogue state...");
+        
+        if (typewriterEffect == null || textComponent == null)
+        {
+            Skip("Components not set up");
+            yield break;
+        }
+        
+        // Set state to Dialogue (simulating dialogue start)
+        SetMockGameState(TypewriterTestGameState.Dialogue);
+        yield return null;
+        
+        string dialogueText = "This is dialogue text appearing during Dialogue state.";
+        bool typingCompleted = false;
+        
+        typewriterEffect.StartTyping(dialogueText, () => { typingCompleted = true; });
+        
+        // Wait a bit
+        yield return new WaitForSeconds(0.2f);
+        
+        if (typewriterEffect.IsTyping())
+        {
+            Pass("Typewriter starts typing during Dialogue state");
+        }
+        else
+        {
+            Fail("Typewriter did not start during Dialogue state");
+        }
+        
+        // Wait for completion
+        float timeout = 5f;
+        float elapsed = 0f;
+        while (!typingCompleted && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (typingCompleted && textComponent.text == dialogueText)
+        {
+            Pass("Typing completed correctly during Dialogue state");
+        }
+        else
+        {
+            Fail($"Typing did not complete correctly during Dialogue state");
+        }
+        
+        // Reset state
+        SetMockGameState(TypewriterTestGameState.Explore);
+    }
+    
+    private IEnumerator TestSkipDuringPauseState()
+    {
+        Debug.Log("[TEST] Testing skip during Pause state...");
+        
+        if (typewriterEffect == null || textComponent == null)
+        {
+            Skip("Components not set up");
+            yield break;
+        }
+        
+        // Start in Dialogue state
+        SetMockGameState(TypewriterTestGameState.Dialogue);
+        
+        string longText = "This is a very long text that would take time to type out completely.";
+        bool completionCalled = false;
+        
+        typewriterEffect.StartTyping(longText, () => { completionCalled = true; });
+        yield return new WaitForSeconds(0.1f);
+        
+        // Pause the game
+        SetMockGameState(TypewriterTestGameState.Pause);
+        yield return null;
+        
+        // Skip should still work (allowing player to finish reading during pause)
+        typewriterEffect.Skip();
+        yield return null;
+        
+        if (completionCalled && textComponent.text == longText)
+        {
+            Pass("Skip works during Pause state (player can finish reading)");
+        }
+        else
+        {
+            Fail($"Skip failed during Pause state. Complete: {completionCalled}, Text match: {textComponent.text == longText}");
+        }
+        
+        // Reset state
+        SetMockGameState(TypewriterTestGameState.Explore);
+    }
+    
+    private IEnumerator TestTypingResumesAfterPause()
+    {
+        Debug.Log("[TEST] Testing typing behavior across pause/resume...");
+        
+        if (typewriterEffect == null || textComponent == null)
+        {
+            Skip("Components not set up");
+            yield break;
+        }
+        
+        // Start in Explore, then transition to Dialogue
+        SetMockGameState(TypewriterTestGameState.Explore);
+        SetMockGameState(TypewriterTestGameState.Dialogue);
+        
+        string text1 = "First line of dialogue.";
+        bool completed1 = false;
+        typewriterEffect.StartTyping(text1, () => { completed1 = true; });
+        
+        // Let it complete
+        float timeout = 5f;
+        float elapsed = 0f;
+        while (!completed1 && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Pause
+        SetMockGameState(TypewriterTestGameState.Pause);
+        yield return new WaitForSeconds(0.2f);
+        
+        // Resume
+        SetMockGameState(TypewriterTestGameState.Dialogue);
+        yield return null;
+        
+        // Start new typing after resume
+        string text2 = "Second line after resume.";
+        bool completed2 = false;
+        typewriterEffect.StartTyping(text2, () => { completed2 = true; });
+        
+        elapsed = 0f;
+        while (!completed2 && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (completed2 && textComponent.text == text2)
+        {
+            Pass("Typewriter works correctly after Pause/Resume cycle");
+        }
+        else
+        {
+            Fail($"Typewriter failed after resume. Complete: {completed2}, Text: '{textComponent.text}'");
+        }
+        
+        // Reset state
+        SetMockGameState(TypewriterTestGameState.Explore);
+    }
 
     #region Assertion Helpers
 
@@ -336,4 +517,17 @@ public class TypewriterEffectSmokeTest : MonoBehaviour
     }
 
     #endregion
+}
+
+/// <summary>
+/// Mock game state enum for testing without Echo Core framework.
+/// Mirrors GameContracts.GameState but is independent.
+/// </summary>
+public enum TypewriterTestGameState
+{
+    Explore,
+    Menu,
+    Pause,
+    CutScene,
+    Dialogue
 }

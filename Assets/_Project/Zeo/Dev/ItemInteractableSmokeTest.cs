@@ -46,8 +46,6 @@ public class ItemInteractableSmokeTest : MonoBehaviour
     private int passCount = 0;
     private int failCount = 0;
     private bool testInProgress = false;
-    private bool dialogueStarted = false;
-    private string lastDialogueId = "";
 
     private void Awake()
     {
@@ -275,12 +273,7 @@ public class ItemInteractableSmokeTest : MonoBehaviour
             yield break;
         }
 
-        // Reset dialogue started flag
-        dialogueStarted = false;
-        lastDialogueId = "";
-
-        // Mock DialogueManager.StartDialogue to track calls
-        // For now, we'll just check that the method exists and can be called
+        // Test dialogue interaction - just verify the method can be called
         dialogueItem.Interact();
 
         yield return new WaitForSeconds(0.5f);
