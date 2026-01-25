@@ -1,30 +1,67 @@
-﻿using UnityEngine;
+﻿
+using GameContracts;
 using TMPro;
-using GameContracts; 
+using UnityEngine;
 
 public class DialogueManager : MonoBehaviour
 {
-    public GameObject dialogueBox;
-    public TextMeshProUGUI contentText;
+    public static DialogueManager Instance { get; private set; }
 
-    // --- 1. 订阅新版的 EventBus ---
-    private void OnEnable()
+    [Header("UI Components")]
+    public GameObject dialogueBox; 
+    public TextMeshProUGUI contentText; 
+
+    private void Awake()
     {
-        EventBus.Subscribe<InteractionEvent>(HandleInteraction);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        dialogueBox.SetActive(false);
     }
 
-    private void OnDisable()
+    private void Start()
     {
-        EventBus.Unsubscribe<InteractionEvent>(HandleInteraction);
+        EventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
     }
 
-    private void HandleInteraction(InteractionEvent evt)
+    private void OnDestroy()
     {
-        dialogueBox.SetActive(true);
-        contentText.text = "收到物体ID: " + evt.ID;
+        EventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
+    }
 
-        // old: ChangeState(GameStateMachine.GameState.Dialogue)
-        // new: SetState(GameState.Dialogue)
-        GameStateMachine.Instance.SetState(GameState.Dialogue);
+    public void StartDialogue(string text)
+    {
+        contentText.text = text;
+        GameManager.Instance.StateMachine.SetState(GameState.Dialogue);
+    }
+
+    public void EndDialogue()
+    {
+        GameManager.Instance.StateMachine.SetState(GameState.Explore);
+    }
+
+    private void OnGameStateChanged(GameStateChanged eventData)
+    {
+        bool isDialogue = (eventData.NewState == GameState.Dialogue);
+        dialogueBox.SetActive(isDialogue);
+
+        if (isDialogue)
+        {
+            Debug.Log("【系统】进入对话模式，UI已显示，输入已锁定。");
+        }
+        else
+        {
+            Debug.Log("【系统】退出对话模式，UI已隐藏，玩家可移动。");
+        }
+    }
+    public void DisplayNextSentence()
+    {
+        Debug.Log("【对话系统】收到路由指令：显示下一句（当前直接结束）");
+        EndDialogue();
+    }
+
+    public void OnClickDialogueBox()
+    {
+        EndDialogue();
     }
 }

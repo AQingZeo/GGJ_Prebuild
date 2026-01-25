@@ -1,18 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
+using GameContracts;
 using UnityEngine;
 
-public class PalyerController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public float moveSpeed = 5f;
+    private Rigidbody2D rb;
+    private Vector2 moveInput;
+
+    void Awake()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (GameManager.Instance == null || GameManager.Instance.StateMachine == null) return;
+
+        if (GameManager.Instance.StateMachine.CurrentState == GameState.Explore)
+        {
+            moveInput.x = Input.GetAxisRaw("Horizontal");
+            moveInput.y = Input.GetAxisRaw("Vertical");
+        }
+        else
+        {
+            moveInput = Vector2.zero;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        rb.velocity = moveInput.normalized * moveSpeed;
     }
 }

@@ -31,14 +31,15 @@ namespace GameContracts
         public const string Submit = "submit";
     }
 
-    public readonly struct GameStateChanged
+    public struct GameStateChanged
     {
-        public readonly GameState From;
-        public readonly GameState To;
-        public GameStateChanged(GameState from, GameState to)
+        public GameState PreviousState; 
+        public GameState NewState;      
+
+        public GameStateChanged(GameState previousState, GameState newState)
         {
-            From = from;
-            To = to;
+            PreviousState = previousState;
+            NewState = newState;
         }
     }
 
