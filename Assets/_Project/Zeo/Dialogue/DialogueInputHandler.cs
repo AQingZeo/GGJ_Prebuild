@@ -10,7 +10,6 @@ public class DialogueInputHandler : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private DialogueManager dialogueManager;
-    [SerializeField] private GameStateMachine gameStateMachine;
 
     [Header("Input Settings")]
     [SerializeField] private KeyCode advanceKey = KeyCode.Space;
@@ -19,17 +18,7 @@ public class DialogueInputHandler : MonoBehaviour
 
     private void Awake()
     {
-        // Auto-find DialogueManager if not assigned
-        if (dialogueManager == null)
-        {
-            dialogueManager = FindObjectOfType<DialogueManager>();
-        }
 
-        // Auto-find GameStateMachine if not assigned
-        if (gameStateMachine == null)
-        {
-            gameStateMachine = FindObjectOfType<GameStateMachine>();
-        }
     }
 
     private void Update()
@@ -40,7 +29,7 @@ public class DialogueInputHandler : MonoBehaviour
             return;
         }
 
-        if (gameStateMachine != null && gameStateMachine.GetState() != GameState.Dialogue)
+        if (GameStateMachine.Instance == null || GameStateMachine.Instance.CurrentState != GameState.Dialogue)
         {
             return;
         }

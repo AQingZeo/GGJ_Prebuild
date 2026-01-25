@@ -18,6 +18,7 @@ public class TypewriterEffect : MonoBehaviour
     private string fullText;
     private bool isTyping = false;
     private System.Action onComplete;
+    private System.Func<char, int, char> characterTransform; // Transform function: (originalChar, index) => transformedChar
 
     private void Awake()
     {
@@ -33,7 +34,8 @@ public class TypewriterEffect : MonoBehaviour
     /// </summary>
     /// <param name="text">The full text to display</param>
     /// <param name="onComplete">Callback when typing is complete</param>
-    public void StartTyping(string text, System.Action onComplete = null)
+    /// <param name="characterTransform">Optional function to transform each character: (char, index) => char</param>
+    public void StartTyping(string text, System.Action onComplete = null, System.Func<char, int, char> characterTransform = null)
     {
         if (textComponent == null)
         {
@@ -46,6 +48,7 @@ public class TypewriterEffect : MonoBehaviour
 
         fullText = text;
         this.onComplete = onComplete;
+        this.characterTransform = characterTransform;
         isTyping = true;
 
         // Start the typewriter coroutine
@@ -62,10 +65,22 @@ public class TypewriterEffect : MonoBehaviour
             StopCoroutine(typewriterCoroutine);
             typewriterCoroutine = null;
             
-            // Show full text immediately
+            // Show full text immediately with transformation applied
             if (textComponent != null && !string.IsNullOrEmpty(fullText))
             {
-                textComponent.text = fullText;
+                if (characterTransform != null)
+                {
+                    string transformedText = "";
+                    for (int i = 0; i < fullText.Length; i++)
+                    {
+                        transformedText += characterTransform(fullText[i], i);
+                    }
+                    textComponent.text = transformedText;
+                }
+                else
+                {
+                    textComponent.text = fullText;
+                }
             }
 
             isTyping = false;
@@ -89,6 +104,7 @@ public class TypewriterEffect : MonoBehaviour
 
         isTyping = false;
         onComplete = null;
+        characterTransform = null;
     }
 
     /// <summary>
@@ -114,7 +130,16 @@ public class TypewriterEffect : MonoBehaviour
 
         for (int i = 0; i <= fullText.Length; i++)
         {
-            textComponent.text = fullText.Substring(0, i);
+            // Build the displayed text with optional character transformation
+            string displayedText = "";
+            for (int j = 0; j < i; j++)
+            {
+                char originalChar = fullText[j];
+                char displayChar = characterTransform != null ? characterTransform(originalChar, j) : originalChar;
+                displayedText += displayChar;
+            }
+            
+            textComponent.text = displayedText;
 
             // Wait for the next character
             if (useUnscaledTime)

@@ -31,7 +31,6 @@ public class ItemInteractableSmokeTest : MonoBehaviour
 {
     [Header("Test Configuration")]
     [SerializeField] private bool runOnStart = true;
-    [SerializeField] private bool createMocks = true;
 
     [Header("Test Objects")]
     [SerializeField] private ItemInteractable testItem;

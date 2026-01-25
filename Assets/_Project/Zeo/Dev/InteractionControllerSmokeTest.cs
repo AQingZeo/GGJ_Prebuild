@@ -10,8 +10,6 @@
  * 
  * REQUIREMENTS:
  * - Camera in scene (for raycast testing)
- * - EventBus in scene (optional - for state testing)
- * - GameStateMachine in scene (optional - for state testing)
  * 
  * WHAT THIS TEST VERIFIES:
  * - InteractionController component setup
@@ -36,8 +34,6 @@ public class InteractionControllerSmokeTest : MonoBehaviour
     [Header("Component References")]
     [SerializeField] private InteractionController interactionController;
     [SerializeField] private Camera testCamera;
-    [SerializeField] private EventBus eventBus;
-    [SerializeField] private GameStateMachine gameStateMachine;
 
     [Header("Test Objects")]
     [SerializeField] private ItemInteractable testInteractable;
@@ -86,18 +82,6 @@ public class InteractionControllerSmokeTest : MonoBehaviour
                 controllerObj.transform.SetParent(transform);
                 interactionController = controllerObj.AddComponent<InteractionController>();
             }
-        }
-
-        // Find or create EventBus
-        if (eventBus == null)
-        {
-            eventBus = FindObjectOfType<EventBus>();
-        }
-
-        // Find or create GameStateMachine
-        if (gameStateMachine == null)
-        {
-            gameStateMachine = FindObjectOfType<GameStateMachine>();
         }
 
         // Create test interactable
@@ -308,18 +292,15 @@ public class InteractionControllerSmokeTest : MonoBehaviour
             yield break;
         }
 
-        // Note: This test would require actual EventBus integration
-        // For now, we'll just verify the component exists and can handle state changes
         Pass("InteractionController has state management (Explore only restriction)");
 
-        // If EventBus exists, we could test state changes
-        if (eventBus != null)
+        if (GameStateMachine.Instance != null)
         {
-            Pass("EventBus found - state management should work");
+            Pass("GameStateMachine.Instance found - state management should work");
         }
         else
         {
-            Debug.Log("[INFO] EventBus not found - state management cannot be fully tested");
+            Debug.Log("[INFO] GameStateMachine.Instance not found - ensure GameStateMachine is in scene");
         }
 
         yield return null;

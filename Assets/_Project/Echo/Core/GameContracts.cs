@@ -9,8 +9,8 @@ namespace GameContracts
         Explore,
         Menu,
         Pause,
-        CutScene, //For any auto play scene
-        Dialogue  //For text dialogue
+        CutScene,
+        Dialogue
     }
 
     public enum WorldMode
@@ -23,7 +23,8 @@ namespace GameContracts
     {
         public const string Flag = "flagText";
     }
-    public static class InputActions 
+
+    public static class InputActions
     {
         public const string Move = "move";
         public const string Interact = "interact";
@@ -34,8 +35,7 @@ namespace GameContracts
     {
         public readonly GameState From;
         public readonly GameState To;
-
-        private GameStateChanged(GameState from, GameState to)
+        public GameStateChanged(GameState from, GameState to)
         {
             From = from;
             To = to;
@@ -45,21 +45,28 @@ namespace GameContracts
     public readonly struct WorldModeChanged
     {
         public readonly WorldMode WMode;
-
-        private WorldModeChanged(WorldMode wMode)
+        public WorldModeChanged(WorldMode wMode)
         {
             WMode = wMode;
         }
     }
-
     public readonly struct FlagChanged
     {
         public readonly string Flag;
         public readonly object Value;
-        private FlagChanged(string flag, object value)
+        public FlagChanged(string flag, object value)
         {
             Flag = flag;
             Value = value;
+        }
+    }
+
+    public readonly struct InteractionEvent
+    {
+        public readonly string ID;
+        public InteractionEvent(string id)
+        {
+            ID = id;
         }
     }
 }

@@ -4,33 +4,32 @@ using UnityEngine;
 using GameContracts;
 
 /// <summary>
-/// Handles player interaction with world objects.
-/// Performs raycast/overlap on click to find IInteractable objects and calls Interact().
+/// Handles player interaction with 2D world objects using Physics2D.
+/// Performs raycast or overlap circle to find IInteractable objects.
 /// Only works when game state is Explore.
 /// </summary>
 public class InteractionController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private GameStateMachine gameStateMachine;
-    [SerializeField] private EventBus eventBus;
 
     [Header("Raycast Settings")]
-    [SerializeField] private float maxInteractionDistance = 10f;
-    [SerializeField] private LayerMask interactionLayerMask = -1; // All layers by default
-    [SerializeField] private bool useOverlapSphere = false;
-    [SerializeField] private float overlapSphereRadius = 2f;
+    [SerializeField] private LayerMask interactionLayerMask = -1;
+    [SerializeField] private bool useOverlapCircle = false;
+    [SerializeField] private float overlapCircleRadius = 2f;
 
     [Header("Input Settings")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private int mouseButton = 0; // 0 = Left, 1 = Right, 2 = Middle
+    [SerializeField] private int mouseButton = 0;
+
+    [Header("Debug")]
+    [SerializeField] private bool showDebugRay = true;
 
     private GameState currentGameState = GameState.Explore;
     private IInteractable currentInteractable = null;
 
     private void Awake()
     {
-        // Auto-find camera if not assigned
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
@@ -38,18 +37,6 @@ public class InteractionController : MonoBehaviour
             {
                 playerCamera = FindObjectOfType<Camera>();
             }
-        }
-
-        // Auto-find GameStateMachine if not assigned
-        if (gameStateMachine == null)
-        {
-            gameStateMachine = FindObjectOfType<GameStateMachine>();
-        }
-
-        // Auto-find EventBus if not assigned
-        if (eventBus == null)
-        {
-            eventBus = FindObjectOfType<EventBus>();
         }
     }
 
@@ -65,25 +52,14 @@ public class InteractionController : MonoBehaviour
 
     private void SubscribeToEvents()
     {
-        // Subscribe to GameStateChanged events via EventBus
-        if (eventBus != null)
-        {
-            eventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
-        }
+        EventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
     }
 
     private void UnsubscribeFromEvents()
     {
-        // Unsubscribe from events
-        if (eventBus != null)
-        {
-            eventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
-        }
+        EventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
     }
 
-    /// <summary>
-    /// Called by EventBus when GameState changes.
-    /// </summary>
     private void OnGameStateChanged(GameStateChanged stateChange)
     {
         currentGameState = stateChange.To;
@@ -91,22 +67,20 @@ public class InteractionController : MonoBehaviour
 
     private void Update()
     {
-        // Only allow interaction in Explore state
         if (currentGameState != GameState.Explore)
         {
             return;
         }
 
-        // Check for input
+        currentInteractable = GetCurrentInteractable();
+
         bool interactInput = false;
         
-        // Check mouse button
         if (Input.GetMouseButtonDown(mouseButton))
         {
             interactInput = true;
         }
         
-        // Check keyboard key
         if (Input.GetKeyDown(interactKey))
         {
             interactInput = true;
@@ -118,9 +92,6 @@ public class InteractionController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Attempt to interact with an object at the mouse position or player position.
-    /// </summary>
     public void TryInteract()
     {
         if (playerCamera == null)
@@ -131,14 +102,12 @@ public class InteractionController : MonoBehaviour
 
         IInteractable interactable = null;
 
-        if (useOverlapSphere)
+        if (useOverlapCircle)
         {
-            // Use overlap sphere around player position
             interactable = FindInteractableOverlap();
         }
         else
         {
-            // Use raycast from camera through mouse position
             interactable = FindInteractableRaycast();
         }
 
@@ -148,43 +117,45 @@ public class InteractionController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Find an interactable object using raycast from camera through mouse position.
-    /// </summary>
     private IInteractable FindInteractableRaycast()
     {
-        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
+        Vector3 mouseWorldPos = playerCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 rayOrigin = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
 
-        if (Physics.Raycast(ray, out hit, maxInteractionDistance, interactionLayerMask))
+        RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.zero, 0f, interactionLayerMask);
+
+        if (hit.collider == null)
         {
-            // Try to get IInteractable from the hit object
+            hit = Physics2D.CircleCast(rayOrigin, 0.1f, Vector2.zero, 0f, interactionLayerMask);
+        }
+
+        if (showDebugRay)
+        {
+            Debug.DrawRay(rayOrigin, Vector2.up * 0.5f, hit.collider != null ? Color.green : Color.red, 0.1f);
+        }
+
+        if (hit.collider != null)
+        {
             IInteractable interactable = hit.collider.GetComponent<IInteractable>();
             if (interactable == null)
             {
-                // Try to get from parent
                 interactable = hit.collider.GetComponentInParent<IInteractable>();
             }
-
             return interactable;
         }
 
         return null;
     }
 
-    /// <summary>
-    /// Find an interactable object using overlap sphere around player position.
-    /// </summary>
     private IInteractable FindInteractableOverlap()
     {
-        Vector3 playerPosition = transform.position;
-        Collider[] colliders = Physics.OverlapSphere(playerPosition, overlapSphereRadius, interactionLayerMask);
+        Vector2 playerPosition = transform.position;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(playerPosition, overlapCircleRadius, interactionLayerMask);
 
-        // Find the closest interactable
         IInteractable closestInteractable = null;
         float closestDistance = float.MaxValue;
 
-        foreach (Collider col in colliders)
+        foreach (Collider2D col in colliders)
         {
             IInteractable interactable = col.GetComponent<IInteractable>();
             if (interactable == null)
@@ -194,7 +165,7 @@ public class InteractionController : MonoBehaviour
 
             if (interactable != null && interactable.CanInteract())
             {
-                float distance = Vector3.Distance(playerPosition, col.transform.position);
+                float distance = Vector2.Distance(playerPosition, col.transform.position);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
@@ -206,9 +177,6 @@ public class InteractionController : MonoBehaviour
         return closestInteractable;
     }
 
-    /// <summary>
-    /// Get the currently highlighted interactable (for UI feedback).
-    /// </summary>
     public IInteractable GetCurrentInteractable()
     {
         if (currentGameState != GameState.Explore)
@@ -216,7 +184,7 @@ public class InteractionController : MonoBehaviour
             return null;
         }
 
-        if (useOverlapSphere)
+        if (useOverlapCircle)
         {
             return FindInteractableOverlap();
         }
@@ -226,22 +194,18 @@ public class InteractionController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Check if there's an interactable object available at the current position.
-    /// </summary>
     public bool HasInteractable()
     {
         IInteractable interactable = GetCurrentInteractable();
         return interactable != null && interactable.CanInteract();
     }
 
-    // Gizmo for debugging overlap sphere
     private void OnDrawGizmosSelected()
     {
-        if (useOverlapSphere)
+        if (useOverlapCircle)
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, overlapSphereRadius);
+            Gizmos.DrawWireSphere(transform.position, overlapCircleRadius);
         }
     }
 }

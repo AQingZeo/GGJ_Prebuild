@@ -14,6 +14,7 @@ public class DialogueUIController : MonoBehaviour
     [SerializeField] private TMP_Text speakerNameText;
     [SerializeField] private TMP_Text dialogueText;
     [SerializeField] private TypewriterEffect typewriterEffect;
+    [SerializeField] private ChaosEffect chaosEffect;
 
     [Header("Settings")]
     [SerializeField] private float maxLinesProportion = 0.4f; // Max 40% of screen height for dialogue text
@@ -40,6 +41,16 @@ public class DialogueUIController : MonoBehaviour
         if (typewriterEffect == null && dialogueText != null)
         {
             typewriterEffect = dialogueText.gameObject.AddComponent<TypewriterEffect>();
+        }
+
+        // Auto-find ChaosEffect if not assigned
+        if (chaosEffect == null)
+        {
+            chaosEffect = GetComponent<ChaosEffect>();
+            if (chaosEffect == null && dialogueText != null)
+            {
+                chaosEffect = dialogueText.GetComponent<ChaosEffect>();
+            }
         }
 
         // Get canvas for screen calculations
@@ -133,8 +144,15 @@ public class DialogueUIController : MonoBehaviour
         {
             if (typewriterEffect != null)
             {
-                // Use typewriter effect with callback
-                typewriterEffect.StartTyping(displayText, onComplete);
+                // Get chaos transformation if ChaosEffect is available and should be applied
+                System.Func<char, int, char> characterTransform = null;
+                if (chaosEffect != null && chaosEffect.ShouldApplyChaos())
+                {
+                    characterTransform = chaosEffect.GetCharacterTransform();
+                }
+                
+                // Use typewriter effect with callback and optional chaos transformation
+                typewriterEffect.StartTyping(displayText, onComplete, characterTransform);
             }
             else
             {

@@ -8,9 +8,7 @@ public class DialogueManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private DialogueUIController dialogueUIController;
     [SerializeField] private ChoiceUIController choiceUIController;
-    [SerializeField] private GameStateMachine gameStateMachine;
     [SerializeField] private FlagManager flagManager;
-    [SerializeField] private EventBus eventBus;
 
     private DialogueDataLoader dataLoader;
     private DialogueDataModel currentDialogue;
@@ -31,12 +29,8 @@ public class DialogueManager : MonoBehaviour
             dialogueUIController = FindObjectOfType<DialogueUIController>();
         if (choiceUIController == null)
             choiceUIController = FindObjectOfType<ChoiceUIController>();
-        if (gameStateMachine == null)
-            gameStateMachine = FindObjectOfType<GameStateMachine>();
         if (flagManager == null)
             flagManager = FindObjectOfType<FlagManager>();
-        if (eventBus == null)
-            eventBus = FindObjectOfType<EventBus>();
     }
 
     private void Start()
@@ -51,20 +45,12 @@ public class DialogueManager : MonoBehaviour
 
     private void SubscribeToEvents()
     {
-        // Subscribe to GameStateChanged events via EventBus
-        if (eventBus != null)
-        {
-            eventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
-        }
+        EventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
     }
 
     private void UnsubscribeFromEvents()
     {
-        // Unsubscribe from events
-        if (eventBus != null)
-        {
-            eventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
-        }
+        EventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
     }
 
     // Called by EventBus when GameState changes
@@ -99,7 +85,7 @@ public class DialogueManager : MonoBehaviour
             Debug.LogWarning($"Dialogue already active. Ending current dialogue before starting {dialogueId}");
             End();
         }
-
+        
         // Load dialogue data
         currentDialogue = dataLoader.Load(dialogueId);
         if (currentDialogue == null)
@@ -119,14 +105,14 @@ public class DialogueManager : MonoBehaviour
         }
 
         // Set game state to Dialogue
-        if (gameStateMachine != null)
+        if (GameStateMachine.Instance != null)
         {
-            previousState = gameStateMachine.GetState(); // Store current state
-            gameStateMachine.SetState(GameState.Dialogue);
+            previousState = GameStateMachine.Instance.CurrentState;
+            GameStateMachine.Instance.SetState(GameState.Dialogue);
         }
         else
         {
-            previousState = GameState.Explore; // Default previous state
+            previousState = GameState.Explore;
         }
 
         // Start from "start" node (or first node if "start" doesn't exist)
@@ -274,10 +260,10 @@ public class DialogueManager : MonoBehaviour
             choiceUIController.ClearChoices();
         }
 
-        // Return to Explore state
-        if (gameStateMachine != null)
+        // Return to previous state
+        if (GameStateMachine.Instance != null)
         {
-            gameStateMachine.SetState(previousState);
+            GameStateMachine.Instance.SetState(previousState);
         }
     }
 
@@ -498,7 +484,7 @@ public class DialogueManager : MonoBehaviour
                 break;
 
             case "get":
-                object flagValue = flagManager.GetFlag(flagName);
+                object flagValue = flagManager.GetFlag(flagName, default(object));
                 Debug.Log($"<color=green>[Flag]</color> Get {flagName} = {flagValue}");
                 break;
 

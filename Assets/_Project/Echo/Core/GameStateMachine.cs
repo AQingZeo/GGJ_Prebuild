@@ -1,18 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using GameContracts;
 
 public class GameStateMachine : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public static GameStateMachine Instance { get; private set; }
+
+    public GameState CurrentState { get; private set; }
+    public GameState PreviousState { get; private set; }
+
+    private void Awake()
     {
-        
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        CurrentState = GameState.Explore;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetState(GameState newState)
     {
-        
+        if (newState == CurrentState) return;
+
+        PreviousState = CurrentState;
+        CurrentState = newState;
+
+        Debug.Log($"<color=orange>¡¾×´Ì¬»ú¡¿×´Ì¬ÇÐ»»: {PreviousState} -> {CurrentState}</color>");
+
+        EventBus.Publish(new GameStateChanged(PreviousState, CurrentState));
+    }
+
+    public void ReturnToPreviousState()
+    {
+        SetState(PreviousState);
     }
 }

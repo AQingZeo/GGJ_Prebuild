@@ -1,18 +1,33 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class EventBus : MonoBehaviour
+public static class EventBus
 {
-    // Start is called before the first frame update
-    void Start()
+    private static readonly Dictionary<Type, List<object>> _subscribers = new Dictionary<Type, List<object>>();
+
+    public static void Subscribe<T>(Action<T> handler)
     {
-        
+        Type type = typeof(T);
+        if (!_subscribers.ContainsKey(type)) _subscribers[type] = new List<object>();
+        _subscribers[type].Add(handler);
     }
 
-    // Update is called once per frame
-    void Update()
+    public static void Unsubscribe<T>(Action<T> handler)
     {
-        
+        Type type = typeof(T);
+        if (_subscribers.ContainsKey(type)) _subscribers[type].Remove(handler);
+    }
+
+    public static void Publish<T>(T eventData)
+    {
+        Type type = typeof(T);
+        if (_subscribers.ContainsKey(type))
+        {
+            var handlers = new List<object>(_subscribers[type]);
+            foreach (var handler in handlers)
+            {
+                ((Action<T>)handler)?.Invoke(eventData);
+            }
+        }
     }
 }

@@ -44,8 +44,6 @@ public class DialogueManagerSmokeTest : MonoBehaviour
 
     [Header("Component References (Auto-found if null)")]
     [SerializeField] private DialogueManager dialogueManager;
-    [SerializeField] private EventBus eventBus;
-    [SerializeField] private GameStateMachine gameStateMachine;
     [SerializeField] private FlagManager flagManager;
     [SerializeField] private DialogueUIController dialogueUIController;
     [SerializeField] private ChoiceUIController choiceUIController;
@@ -77,28 +75,6 @@ public class DialogueManagerSmokeTest : MonoBehaviour
             {
                 GameObject dmObj = new GameObject("DialogueManager");
                 dialogueManager = dmObj.AddComponent<DialogueManager>();
-            }
-        }
-
-        // Find or create EventBus
-        if (eventBus == null)
-        {
-            eventBus = FindObjectOfType<EventBus>();
-            if (eventBus == null && createMocks)
-            {
-                GameObject ebObj = new GameObject("EventBus");
-                eventBus = ebObj.AddComponent<EventBus>();
-            }
-        }
-
-        // Find or create GameStateMachine
-        if (gameStateMachine == null)
-        {
-            gameStateMachine = FindObjectOfType<GameStateMachine>();
-            if (gameStateMachine == null && createMocks)
-            {
-                GameObject gsmObj = new GameObject("GameStateMachine");
-                gameStateMachine = gsmObj.AddComponent<GameStateMachine>();
             }
         }
 

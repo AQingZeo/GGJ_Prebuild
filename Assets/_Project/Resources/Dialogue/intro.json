@@ -3,8 +3,79 @@
   "nodes": {
     "start": { 
       "speaker": "Narrator", 
-      "text": "Hello.", 
-      "nextNodeId": "end" 
+      "text": "Welcome to the world of dreams. What would you like to do?",
+      "commands": [
+        {
+          "command": "log",
+          "args": ["[COMMAND] Dialogue started - intro scene initialized"]
+        }
+      ],
+      "choices": [
+        {
+          "text": "Explore the dream",
+          "nextNodeId": "explore_choice"
+        },
+        {
+          "text": "Wake up",
+          "nextNodeId": "wake_choice"
+        },
+        {
+          "text": "Stay silent",
+          "nextNodeId": "silent_choice"
+        }
+      ]
+    },
+    "explore_choice": {
+      "speaker": "Narrator",
+      "text": "You venture deeper into the dream world...",
+      "commands": [
+        {
+          "command": "log",
+          "args": ["[COMMAND] Player chose to explore - setting flag"]
+        },
+        {
+          "command": "flag",
+          "args": ["set", "choseExplore", "true"]
+        }
+      ],
+      "nextNodeId": "ending"
+    },
+    "wake_choice": {
+      "speaker": "Narrator",
+      "text": "You try to open your eyes, but the dream holds you tight...",
+      "commands": [
+        {
+          "command": "log",
+          "args": ["[COMMAND] Player tried to wake up"]
+        }
+      ],
+      "nextNodeId": "ending"
+    },
+    "silent_choice": {
+      "speaker": "???",
+      "text": "Your silence speaks volumes. The dream shifts around you.",
+      "commands": [
+        {
+          "command": "log",
+          "args": ["[COMMAND] Player stayed silent - mysterious voice appears"]
+        },
+        {
+          "command": "flag",
+          "args": ["set", "metMystery", "true"]
+        }
+      ],
+      "nextNodeId": "ending"
+    },
+    "ending": {
+      "speaker": "Narrator",
+      "text": "The dream continues... (End of intro demo)",
+      "commands": [
+        {
+          "command": "log",
+          "args": ["[COMMAND] Dialogue complete - intro finished"]
+        }
+      ],
+      "nextNodeId": "end"
     },
     "end": { 
       "speaker": "", 
