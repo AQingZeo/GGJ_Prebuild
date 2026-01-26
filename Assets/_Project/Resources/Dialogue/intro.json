@@ -3,7 +3,7 @@
   "nodes": {
     "start": { 
       "speaker": "Narrator", 
-      "text": "Welcome to the world of dreams. What would you like to do?",
+      "text": "Welcome to the world of dreams. What would you like to do? 中文测试",
       "commands": [
         {
           "command": "log",
@@ -16,7 +16,7 @@
           "nextNodeId": "explore_choice"
         },
         {
-          "text": "Wake up",
+          "text": "Wake up 中文选项测试",
           "nextNodeId": "wake_choice"
         },
         {
@@ -74,12 +74,7 @@
           "command": "log",
           "args": ["[COMMAND] Dialogue complete - intro finished"]
         }
-      ],
-      "nextNodeId": "end"
-    },
-    "end": { 
-      "speaker": "", 
-      "text": "" 
+      ]
     }
   }
 }
