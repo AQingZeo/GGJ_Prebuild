@@ -63,7 +63,10 @@ public class ItemInteractable : MonoBehaviour
         ExecuteTrigger();
     }
 
-    private void ExecuteTrigger()
+    /// <summary>
+    /// Override in subclasses (e.g. CollectibleItemInteractable) to add behavior before/after base.
+    /// </summary>
+    protected virtual void ExecuteTrigger()
     {
         // Set flag if configured
         if (!string.IsNullOrEmpty(setFlagKey) && GameManager.Instance != null && GameManager.Instance.Flags != null)

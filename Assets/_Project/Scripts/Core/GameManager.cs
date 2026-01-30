@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public PlayerState Player { get; private set; }
     public SaveManager Save { get; private set; }
     public GameStateMachine StateMachine { get; private set; }
+    public InventoryService Inventory { get; private set; }
 
     private void Awake()
     {
@@ -25,10 +26,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Bootstrap managers
+        // Bootstrap managers; inventory is empty (new) or filled later via LoadGame from PlayerState
         Flags = new FlagManager();
         Player = new PlayerState();
         Save = new SaveManager();
+        Inventory = new InventoryService(Player);
 
         Debug.Log("<color=green>【GameManager】所有核心系统初始化完毕！</color>");
     }
@@ -93,7 +95,8 @@ public class GameManager : MonoBehaviour
         }
 
         Save.Load(Flags, Player);
-        
+        Inventory?.RaiseInventoryChanged();
+
         if (StateMachine != null)
         {
             StateMachine.SetState(GameState.Explore);
