@@ -43,6 +43,12 @@ public class InventoryUIController : MonoBehaviour
             Inventory.OnInventoryChanged -= RefreshList;
             Inventory.OnSelectedItemChanged -= OnSelectionChanged;
         }
+        // Do NOT unsubscribe from EventBus here — we must still receive GameStateChanged when returning to Explore
+        // so we can turn the panel back on. Unsubscribe only in OnDestroy.
+    }
+
+    private void OnDestroy()
+    {
         EventBus.Unsubscribe<GameStateChanged>(OnGameStateChanged);
     }
 
@@ -56,6 +62,8 @@ public class InventoryUIController : MonoBehaviour
         if (panelRoot == null) return;
         bool explore = StateMachine != null && StateMachine.CurrentState == GameState.Explore;
         panelRoot.SetActive(explore);
+        if (explore)
+            RefreshList();
     }
 
     private void OnSelectionChanged(string selectedId)
@@ -88,15 +96,27 @@ public class InventoryUIController : MonoBehaviour
                 : CreateDefaultSlot(listContainer);
             _slots.Add(slot);
 
-            var label = slot.GetComponentInChildren<TextMeshProUGUI>();
+            // Preserve prefab size when parent has Layout Group so slot font/size aren't squeezed
+            var slotRect = slot.GetComponent<RectTransform>();
+            if (slotRect != null)
+            {
+                var le = slot.GetComponent<LayoutElement>();
+                if (le == null) le = slot.AddComponent<LayoutElement>();
+                float w = slotRect.rect.width, h = slotRect.rect.height;
+                if (le.preferredWidth < 1f) le.preferredWidth = w > 1f ? w : 160f;
+                if (le.preferredHeight < 1f) le.preferredHeight = h > 1f ? h : 40f;
+            }
+
+            var label = slot.GetComponentInChildren<TextMeshProUGUI>(true);
             if (label != null)
             {
                 var def = GetDisplayDefinition(id);
-                label.text = def != null ? def.displayName : id;
-                if (count > 1) label.text += " x" + count;
+                string displayName = def != null && !string.IsNullOrEmpty(def.displayName) ? def.displayName : id;
+                label.text = count > 1 ? $"{displayName} x{count}" : displayName;
+                // Only set text so prefab font/size/layout are preserved
             }
 
-            var icon = slot.GetComponentInChildren<Image>();
+            var icon = slot.GetComponentInChildren<Image>(true);
             if (icon != null)
             {
                 var def = GetDisplayDefinition(id);
@@ -158,6 +178,20 @@ public class InventoryUIController : MonoBehaviour
         foreach (var d in displayDefinitions)
         {
             if (d != null && d.itemId == itemId) return d;
+        }
+        // Fallback: load from Resources/Items/{itemId} so display name is used without Inspector list
+        var fromResources = Resources.Load<ItemDefinition>($"Items/{itemId}");
+        if (fromResources != null) return fromResources;
+        // Try base id without common prefixes (e.g. "opened_poison" -> "poison")
+        if (itemId.IndexOf('_') > 0)
+        {
+            string baseId = itemId.Substring(itemId.LastIndexOf('_') + 1);
+            foreach (var d in displayDefinitions)
+            {
+                if (d != null && d.itemId == baseId) return d;
+            }
+            fromResources = Resources.Load<ItemDefinition>($"Items/{baseId}");
+            if (fromResources != null) return fromResources;
         }
         return null;
     }

@@ -1,0 +1,25 @@
+---
+description: This is a new rule
+alwaysApply: false
+---
+
+1) Unity-first by default:
+Prefer Unity built-in features, components, and APIs (UI/EventSystem, Physics, Time, SceneManager, CanvasGroup, etc.)
+over custom implementations, unless a clear limitation exists.
+
+2) Minimal & scene-appropriate scripting:
+Write scripts that match the scene’s responsibility (Bootstrap = persistent services + global UI; Base scenes = content;
+Overlays = on-demand UI/flow). Avoid adding systems that belong elsewhere.
+
+
+4) Future-change tolerant:
+Assume other files in the folder may change. Avoid tight coupling to specific implementations in other scripts unless they are
+explicitly referenced by the task. Prefer stable Unity interfaces/events and explicit dependencies.
+
+5) Do not preserve bad architecture for consistency:
+Do not keep redundant/legacy patterns just to match other files. If the current edit would worsen duplication or coupling,
+propose a refactor that reduces scripts and removes concurrency/race risks.
+
+6) Explicit over implicit:
+No silent background scene loads/coroutines. All overlay loads (Dialogue/Cutscene) must be triggered by explicit calls.
+Fail fast on missing references; never auto-find objects at runtime.

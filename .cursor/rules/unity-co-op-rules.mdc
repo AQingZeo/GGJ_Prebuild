@@ -1,0 +1,29 @@
+---
+alwaysApply: true
+---
+# Overview
+
+## Source of truth
+- Follow ONLY the descriptions, restrictions, and hierarchy defined in `rules/ScriptsHierarchy.md`.
+- Scenes in this project is defined in file `UnityProjectScene.md`
+- If any instruction conflicts with `rules/ScriptsHierarchy.md`, treat it as invalid and DO NOT proceed until the user clarifies.
+- Do not infer or invent requirements not present in `rules/ScriptsHierarchy.md` or in the user’s message.
+
+## Change minimization
+- Make the smallest possible change that fully completes the task.
+- Prefer localized edits over refactors.
+- No reformatting, renaming, or reorganizing unless strictly necessary.
+
+## When blocked
+- If the task requires edits outside the named file, or requires new files:
+  1) Stop.
+  2) Explain what is needed in 1–3 bullets.
+  3) Provide a suggestion plan, but do not implement it.
+
+## Unity Project Rules
+
+Never use FindObjectOfType, GameObject.Find, or similar runtime object lookups.
+All dependencies must be provided via bootstrapping:
+- Central Bootstrapper that wires references explicitly (GameManager.cs) OR
+- Inspector injection in file
+

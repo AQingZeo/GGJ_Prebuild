@@ -17,7 +17,9 @@ public enum InteractionType
 public class ItemInteractable : MonoBehaviour
 {
     [Header("Item Settings")]
-    [SerializeField] private string itemId = ""; // Optional, for inventory/logging
+    [SerializeField] private string itemId = ""; // For inventory pickup and/or logging
+    [SerializeField] private bool addToInventoryOnTrigger = false; // If true, add itemId to inventory on trigger/click
+    [SerializeField] private ItemDefinition itemDefinition; // Optional: use this itemId/display if set
 
     [Header("Flag Settings")]
     [SerializeField] private string setFlagKey = "";
@@ -63,42 +65,41 @@ public class ItemInteractable : MonoBehaviour
         ExecuteTrigger();
     }
 
-    /// <summary>
-    /// Override in subclasses (e.g. CollectibleItemInteractable) to add behavior before/after base.
-    /// </summary>
-    protected virtual void ExecuteTrigger()
+    private string EffectiveItemId => !string.IsNullOrEmpty(itemId) ? itemId : (itemDefinition != null ? itemDefinition.itemId : "");
+
+    private void ExecuteTrigger()
     {
+        // Optional: add to inventory (collectible pickup)
+        if (addToInventoryOnTrigger)
+        {
+            string id = EffectiveItemId;
+            if (!string.IsNullOrEmpty(id) && GameManager.Instance != null && GameManager.Instance.Inventory != null)
+            {
+                GameManager.Instance.Inventory.AddItem(id);
+            }
+        }
+
         // Set flag if configured
         if (!string.IsNullOrEmpty(setFlagKey) && GameManager.Instance != null && GameManager.Instance.Flags != null)
         {
             var flags = GameManager.Instance.Flags;
-            
-            // Use int setFlagIntValue or bool setFlagBoolValue
-            // If setFlagIntValue is non-zero, use int; otherwise use bool
             if (setFlagIntValue != 0)
-            {
                 flags.Set(setFlagKey, setFlagIntValue);
-            }
             else
-            {
                 flags.Set(setFlagKey, setFlagBoolValue);
-            }
         }
 
         // Start dialogue if configured
         if (!string.IsNullOrEmpty(dialogueId))
         {
-            // Set state to Dialogue (this loads DialogueScene)
             if (GameStateMachine.Instance != null)
-            {
                 GameStateMachine.Instance.SetState(GameState.Dialogue);
-            }
             StartCoroutine(StartDialogueWhenReady(dialogueId, destroyOnTrigger));
         }
 
-        if (!string.IsNullOrEmpty(itemId))
+        if (!string.IsNullOrEmpty(EffectiveItemId) && !addToInventoryOnTrigger)
         {
-            Debug.Log($"Item collected: {itemId}");
+            Debug.Log($"Item interacted: {EffectiveItemId}");
         }
     }
 
