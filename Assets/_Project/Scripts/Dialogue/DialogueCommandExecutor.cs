@@ -61,10 +61,53 @@ public class DialogueCommandExecutor
                 HandleLogCommand(args);
                 break;
 
+            case "giveitem":
+            case "additem":
+                HandleGiveItemCommand(args);
+                break;
+
+            case "removeitem":
+                HandleRemoveItemCommand(args);
+                break;
+
             default:
                 Debug.LogWarning($"Unknown dialogue command: {command.command}");
                 break;
         }
+    }
+
+    private void HandleGiveItemCommand(List<string> args)
+    {
+        if (args == null || args.Count < 1)
+        {
+            Debug.LogWarning("giveitem command requires at least 1 argument (itemId)");
+            return;
+        }
+        if (GameManager.Instance == null || GameManager.Instance.Inventory == null)
+        {
+            Debug.LogWarning("InventoryService not found");
+            return;
+        }
+        string itemId = args[0];
+        GameManager.Instance.Inventory.AddItem(itemId);
+        Debug.Log($"<color=green>[Inventory]</color> giveitem {itemId}");
+    }
+
+    private void HandleRemoveItemCommand(List<string> args)
+    {
+        if (args == null || args.Count < 1)
+        {
+            Debug.LogWarning("removeitem command requires at least 1 argument (itemId)");
+            return;
+        }
+        if (GameManager.Instance == null || GameManager.Instance.Inventory == null)
+        {
+            Debug.LogWarning("InventoryService not found");
+            return;
+        }
+        string itemId = args[0];
+        GameManager.Instance.Inventory.RemoveItem(itemId);
+        Debug.Log($"<color=green>[Inventory]</color> removeitem {itemId}");
     }
 
     /// <summary>
