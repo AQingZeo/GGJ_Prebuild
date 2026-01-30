@@ -1,57 +1,64 @@
 using UnityEngine;
 
-public class MaskController_Multi : MonoBehaviour
+public class MaskController : MonoBehaviour
 {
-    public Material maskMaterial;
+    [Header("--- 视觉设置 ---")]
+    public Material targetMaterial; 
+    public float switchSpeed = 5f;  
 
-    // 记录三个面具的开关状态，默认都是关着的 (false)
-    private bool redOn = false;
-    private bool greenOn = false;
-    private bool blueOn = false;
-    void Start()
+    [Header("--- Zeo 物品 ID 配置 ---")]
+
+    public string redMaskID = "Mask_Red";
+    public string blueMaskID = "Mask_Blue";
+    public string yellowMaskID = "Mask_Yellow";
+
+    private InventoryService _inventoryService; 
+    private bool _isRedActive;
+    private bool _isBlueActive;
+    private bool _isYellowActive;
+
+    private float _curRed, _curBlue, _curYellow;
+
+    public void Initialize(InventoryService service)
     {
-        UpdateShader();
+        _inventoryService = service;
+        Debug.Log("MaskController: 已连接到 InventoryService");
     }
 
     void Update()
     {
-        // 按下 1：切换红色开关
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            redOn = !redOn; 
-            UpdateShader();
-        }
+        if (_inventoryService == null) return; 
 
-        // 按下 2：切换绿色开关
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            greenOn = !greenOn;
-            UpdateShader();
-        }
+        HandleInput();
+        UpdateShader();
+    }
 
-        // 按下 3：切换蓝色开关
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            blueOn = !blueOn;
-            UpdateShader();
-        }
+    void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1) && _inventoryService.HasItem(redMaskID))
+            _isRedActive = !_isRedActive;
 
-        // 按下 0：一键全部关闭
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            redOn = greenOn = blueOn = false;
-            UpdateShader();
-        }
+        if (Input.GetKeyDown(KeyCode.Alpha2) && _inventoryService.HasItem(blueMaskID))
+            _isBlueActive = !_isBlueActive;
+
+        if (Input.GetKeyDown(KeyCode.Alpha3) && _inventoryService.HasItem(yellowMaskID))
+            _isYellowActive = !_isYellowActive;
     }
 
     void UpdateShader()
     {
-        if (maskMaterial == null) return;
+        if (targetMaterial == null) return;
 
-        maskMaterial.SetFloat("_RedMask", redOn ? 1.0f : 0.0f);
-        maskMaterial.SetFloat("_GreenMask", greenOn ? 1.0f : 0.0f);
-        maskMaterial.SetFloat("_BlueMask", blueOn ? 1.0f : 0.0f);
+        float targetR = _isRedActive ? 1f : 0f;
+        float targetG = _isBlueActive ? 1f : 0f;
+        float targetB = _isYellowActive ? 1f : 0f;
 
-        Debug.Log($"当前状态：红({redOn}) 绿({greenOn}) 蓝({blueOn})");
+        _curRed = Mathf.MoveTowards(_curRed, targetR, Time.deltaTime * switchSpeed);
+        _curBlue = Mathf.MoveTowards(_curBlue, targetG, Time.deltaTime * switchSpeed);
+        _curYellow = Mathf.MoveTowards(_curYellow, targetB, Time.deltaTime * switchSpeed);
+
+        targetMaterial.SetFloat("_RedWeight", Mathf.Clamp01(_curRed));
+        targetMaterial.SetFloat("_BlueWeight", Mathf.Clamp01(_curBlue));
+        targetMaterial.SetFloat("_YellowWeight", Mathf.Clamp01(_curYellow));
     }
 }
