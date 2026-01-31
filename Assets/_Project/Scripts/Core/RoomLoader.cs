@@ -12,6 +12,12 @@ public class RoomLoader : MonoBehaviour
     [Tooltip("Optional: player transform to move to spawn point when loading a room.")]
     [SerializeField] private Transform playerTransform;
 
+    [Header("Initial room (loaded when Explore loads)")]
+    [Tooltip("e.g. Room_StartRoom. Leave empty to load no room until an interactable requests one.")]
+    [SerializeField] private string initialRoomSceneName = "";
+    [Tooltip("Optional spawn point name in the initial room (e.g. Spawn_FromStartRoom).")]
+    [SerializeField] private string initialSpawnPoint = "";
+
     private string _currentRoomSceneName = "";
     private Coroutine _transition;
 
@@ -20,6 +26,22 @@ public class RoomLoader : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.SetRoomLoader(this);
     }
+
+    private void Start()
+    {
+        // Prefer saved room (after LoadGame); otherwise load initial room
+        if (!string.IsNullOrEmpty(_currentRoomSceneName)) return;
+
+        var flags = GameManager.Instance?.Flags;
+        var savedRoom = flags != null ? flags.Get(CurrentRoomFlagKey, "") : "";
+        if (!string.IsNullOrEmpty(savedRoom))
+            LoadRoom(savedRoom, null);
+        else if (!string.IsNullOrEmpty(initialRoomSceneName))
+            LoadRoom(initialRoomSceneName, string.IsNullOrEmpty(initialSpawnPoint) ? null : initialSpawnPoint);
+    }
+
+    /// <summary>Flag key used for save/load. Stored as string in Flags.</summary>
+    public const string CurrentRoomFlagKey = "current_room";
 
     private void OnDestroy()
     {
@@ -59,6 +81,8 @@ public class RoomLoader : MonoBehaviour
         }
 
         _currentRoomSceneName = roomSceneName;
+        if (GameManager.Instance != null)
+            GameManager.Instance.Flags.Set(CurrentRoomFlagKey, roomSceneName);
 
         if (!string.IsNullOrEmpty(spawnPointName) && playerTransform != null)
         {

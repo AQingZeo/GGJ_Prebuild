@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace GameContracts
         String
     }
 
+    [Serializable]
     public class FlagValueDto
     {
         public FlagValueType Type;
