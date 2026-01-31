@@ -47,12 +47,13 @@ public class SaveManager
     public void Load(FlagManager flagManager, PlayerState playerState, InteractableSaveService interactables)
     {
         if (!HasSave())
-        {
             return;
-        }
 
         string json = File.ReadAllText(SaveFilePath);
         SaveData saveData = JsonUtility.FromJson<SaveData>(json);
+
+        if (saveData == null)
+            return;
 
         if (saveData.flags != null)
         {
@@ -61,14 +62,10 @@ public class SaveManager
         }
 
         if (saveData.playerState != null && playerState != null)
-        {
             playerState.LoadFromSnapshot(saveData.playerState);
-        }
 
         if (saveData.interactables != null && interactables != null)
-        {
             interactables.LoadFromSnapshot(saveData.interactables);
-        }
     }
 
     public bool HasSave()

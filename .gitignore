@@ -100,3 +100,7 @@ InitTestScene*.unity*
 
 #Echo's file
 Echo/
+
+.cursor/
+.vscode/
+.local_docs/

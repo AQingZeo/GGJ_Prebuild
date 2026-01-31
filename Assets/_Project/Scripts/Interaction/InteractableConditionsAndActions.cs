@@ -147,9 +147,8 @@ public class SerializableAction
                 ctx.Interactables.SetState(setId, a.newState);
                 break;
             case ActionType.ConsumeInteractable:
-                if (ctx.Interactables == null) return;
                 string consumeId = (a.targetId == "self" || string.IsNullOrEmpty(a.targetId)) ? selfId : a.targetId;
-                ctx.Interactables.Consume(consumeId);
+                ctx.Flags?.Set("consumed_" + consumeId, true);
                 break;
             case ActionType.LoadRoom:
                 if (!string.IsNullOrEmpty(a.roomSceneName))
@@ -333,9 +332,8 @@ public class ConsumeInteractableAction : InteractableAction
 
     public override void Execute(IInteractableContext ctx, string selfId, string selectedItemId)
     {
-        if (ctx?.Interactables == null) return;
         string id = (targetId == "self" || string.IsNullOrEmpty(targetId)) ? selfId : targetId;
-        ctx.Interactables.Consume(id);
+        ctx?.Flags?.Set("consumed_" + id, true);
     }
 }
 

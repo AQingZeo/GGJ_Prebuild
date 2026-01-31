@@ -57,4 +57,27 @@ public class PauseUIController : MonoBehaviour
         // Resume game time
         Time.timeScale = 1f;
     }
+
+    /// <summary>Called by Resume button. Return to previous state (e.g. Explore).</summary>
+    public void Resume()
+    {
+        Hide();
+        if (GameStateMachine.Instance != null)
+            GameStateMachine.Instance.ReturnToPreviousState();
+    }
+
+    /// <summary>Called by Save button. Writes flags, player, interactables to disk.</summary>
+    public void SaveGame()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.SaveGame();
+    }
+
+    /// <summary>Called by Back to Menu button. Unpauses and switches to Menu scene.</summary>
+    public void BackToMenu()
+    {
+        Hide();
+        if (GameStateMachine.Instance != null)
+            GameStateMachine.Instance.SetState(GameState.Menu);
+    }
 }

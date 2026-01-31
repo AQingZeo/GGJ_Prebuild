@@ -27,9 +27,9 @@ public static class SaveLoadTest
         // ---- Set known values ----
         flags.Set("test_save_flag", true);
         flags.Set("test_int", 42);
+        flags.Set("consumed_door_start_picked", true); // consumed now stored as flag
         player.AddToInventory("test_item", 1);
         player.AddToInventory("door_start", 1);
-        interactables.Consume("door_start_picked");
         interactables.SetState("door_start", 2);
 
         save.Save(flags, player, interactables);
@@ -74,10 +74,10 @@ public static class SaveLoadTest
             ok = false;
         }
 
-        // ---- Verify interactables (consumed + states) ----
-        if (!interactables2.IsConsumed("door_start_picked"))
+        // ---- Verify interactables (consumed as flag + states) ----
+        if (!flags2.Get("consumed_door_start_picked", false))
         {
-            Debug.LogError("[SaveLoadTest] Interactables: door_start_picked not consumed after load.");
+            Debug.LogError("[SaveLoadTest] Flag consumed_door_start_picked missing after load.");
             ok = false;
         }
         if (interactables2.GetState("door_start", 0) != 2)
@@ -87,7 +87,7 @@ public static class SaveLoadTest
         }
 
         if (ok)
-            Debug.Log("<color=green>[SaveLoadTest] PASSED: flags, inventory (items the player has), and interactables (consumed + states) round-trip correctly.</color>");
+            Debug.Log("<color=green>[SaveLoadTest] PASSED: flags (including consumed), inventory, and interactable states round-trip correctly.</color>");
         else
             Debug.LogError("[SaveLoadTest] FAILED: see errors above.");
     }

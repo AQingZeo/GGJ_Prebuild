@@ -12,11 +12,16 @@ public class InteractableCore : MonoBehaviour
     private bool _visible = true;
     private IInteractableContext Ctx => GameManager.Instance as IInteractableContext;
 
+    private string ConsumedFlagKey => "consumed_" + _id;
+
     private void Awake()
     {
-        _id = !string.IsNullOrEmpty(idOverride) ? idOverride : (def != null ? def.id : gameObject.name);
+        // Use idOverride if set, else def.id if set, else fallback to gameObject.name
+        _id = !string.IsNullOrEmpty(idOverride) ? idOverride :
+              (def != null && !string.IsNullOrEmpty(def.id)) ? def.id : gameObject.name;
 
-        if (Ctx?.Interactables != null && Ctx.Interactables.IsConsumed(_id))
+        // Use flags for consumed state (flags serialize correctly)
+        if (Ctx?.Flags != null && Ctx.Flags.Get(ConsumedFlagKey, false))
         {
             _consumed = true;
             gameObject.SetActive(false);
@@ -112,7 +117,7 @@ public class InteractableCore : MonoBehaviour
 
             if (def.oneShot)
             {
-                Ctx.Interactables.Consume(_id);
+                Ctx.Flags?.Set(ConsumedFlagKey, true);
                 _consumed = true;
                 gameObject.SetActive(false);
             }
