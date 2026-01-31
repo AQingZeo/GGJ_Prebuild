@@ -11,7 +11,8 @@ namespace GameContracts
         Menu,
         Pause,
         CutScene,
-        Dialogue
+        Dialogue,
+        Diary,
     }
 
     public enum WorldMode
