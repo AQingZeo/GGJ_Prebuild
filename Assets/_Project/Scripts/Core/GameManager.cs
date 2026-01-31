@@ -16,9 +16,12 @@ public class GameManager : MonoBehaviour, IInteractableContext
     public DialogueManager Dialogue { get; set; }
     public string PendingDialogueId { get; set; }
     public RoomLoader RoomLoader { get; private set; }
+    public ImagePopUIController ImagePopController { get; private set; }
 
     /// <summary>Called by RoomLoader in ExploreScene on Awake/OnDestroy. No FindObjectOfType.</summary>
     public void SetRoomLoader(RoomLoader loader) { RoomLoader = loader; }
+    /// <summary>Called by ImagePopUIController on Awake/OnDestroy. No FindObjectOfType.</summary>
+    public void SetImagePopController(ImagePopUIController c) { ImagePopController = c; }
 
     private void Awake()
     {

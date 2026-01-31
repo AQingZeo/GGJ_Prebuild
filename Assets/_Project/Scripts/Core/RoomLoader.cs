@@ -18,6 +18,7 @@ public class RoomLoader : MonoBehaviour
     [Tooltip("Optional spawn point name in the initial room (e.g. Spawn_FromStartRoom).")]
     [SerializeField] private string initialSpawnPoint = "";
 
+
     private string _currentRoomSceneName = "";
     private Coroutine _transition;
 
@@ -42,6 +43,8 @@ public class RoomLoader : MonoBehaviour
 
     /// <summary>Flag key used for save/load. Stored as string in Flags.</summary>
     public const string CurrentRoomFlagKey = "current_room";
+    /// <summary>First-time enter flags: "entered_" + roomSceneName (e.g. entered_Room_StartRoom). Set when player enters that room for the first time.</summary>
+    public const string FirstEnterFlagPrefix = "entered_";
 
     private void OnDestroy()
     {
@@ -82,7 +85,12 @@ public class RoomLoader : MonoBehaviour
 
         _currentRoomSceneName = roomSceneName;
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.Flags.Set(CurrentRoomFlagKey, roomSceneName);
+            string firstEnterKey = FirstEnterFlagPrefix + roomSceneName;
+            if (!GameManager.Instance.Flags.HasFlag(firstEnterKey))
+                GameManager.Instance.Flags.Set(firstEnterKey, true);
+        }
 
         if (!string.IsNullOrEmpty(spawnPointName) && playerTransform != null)
         {

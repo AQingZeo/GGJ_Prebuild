@@ -14,6 +14,7 @@ public interface IInteractableContext
     DialogueManager Dialogue { get; }
     GameStateMachine StateMachine { get; }
     RoomLoader RoomLoader { get; }
+    ImagePopUIController ImagePopController { get; }
 }
 
 // ---- Serializable wrappers (show correctly in Inspector) ----
@@ -23,8 +24,7 @@ public enum ConditionType
     FlagBool,
     FlagInt,
     HasInventoryItem,
-    InteractableState,
-    EquippedMask
+    InteractableState
 }
 
 public enum ActionType
@@ -35,8 +35,8 @@ public enum ActionType
     RemoveInventoryItem,
     SetInteractableState,
     ConsumeInteractable,
-    SetEquippedMask,
-    LoadRoom
+    LoadRoom,
+    ImagePop
 }
 
 [Serializable]
@@ -56,8 +56,6 @@ public class SerializableCondition
     public string interactableId = "self";
     public InteractableStateCompareCondition.Op stateOp = InteractableStateCompareCondition.Op.Equal;
     public int stateValue = 0;
-    [Header("EquippedMask")]
-    public string maskId = "";
 
     public static bool Eval(SerializableCondition c, IInteractableContext ctx, string selfId)
     {
@@ -93,8 +91,6 @@ public class SerializableCondition
                     case InteractableStateCompareCondition.Op.Greater: return state > c.stateValue;
                     default: return false;
                 }
-            case ConditionType.EquippedMask:
-                return true;
             default:
                 return false;
         }
@@ -117,11 +113,12 @@ public class SerializableAction
     [Header("SetInteractableState / ConsumeInteractable")]
     public string targetId = "self";
     public int newState = 0;
-    [Header("SetEquippedMask")]
-    public string maskId = "";
     [Header("LoadRoom")]
     public string roomSceneName = "";
     public string spawnPoint = "";
+    [Header("ImagePop")]
+    [Tooltip("Sprite to show as overlay when action runs. Assign in Interactable Definition.")]
+    public Sprite imageSprite;
 
     public static void Execute(SerializableAction a, IInteractableContext ctx, string selfId, string selectedItemId)
     {
@@ -154,11 +151,13 @@ public class SerializableAction
                 string consumeId = (a.targetId == "self" || string.IsNullOrEmpty(a.targetId)) ? selfId : a.targetId;
                 ctx.Interactables.Consume(consumeId);
                 break;
-            case ActionType.SetEquippedMask:
-                break;
             case ActionType.LoadRoom:
                 if (!string.IsNullOrEmpty(a.roomSceneName))
                     ctx.RoomLoader?.LoadRoom(a.roomSceneName, string.IsNullOrEmpty(a.spawnPoint) ? null : a.spawnPoint);
+                break;
+            case ActionType.ImagePop:
+                if (a.imageSprite != null)
+                    ctx.ImagePopController?.Show(a.imageSprite);
                 break;
         }
     }
@@ -243,17 +242,6 @@ public class InteractableStateCompareCondition : InteractableCondition
             case Op.Greater: return actual > value;
             default: return false;
         }
-    }
-}
-
-[Serializable]
-public class EquippedMaskCondition : InteractableCondition
-{
-    public string maskId = "";
-
-    public override bool Eval(IInteractableContext ctx, string selfId)
-    {
-        return true;
     }
 }
 
@@ -348,16 +336,6 @@ public class ConsumeInteractableAction : InteractableAction
         if (ctx?.Interactables == null) return;
         string id = (targetId == "self" || string.IsNullOrEmpty(targetId)) ? selfId : targetId;
         ctx.Interactables.Consume(id);
-    }
-}
-
-[Serializable]
-public class SetEquippedMaskAction : InteractableAction
-{
-    public string maskId = "";
-
-    public override void Execute(IInteractableContext ctx, string selfId, string selectedItemId)
-    {
     }
 }
 

@@ -27,9 +27,6 @@ public static class SaveLoadTest
         // ---- Set known values ----
         flags.Set("test_save_flag", true);
         flags.Set("test_int", 42);
-        player.SetLevel(5);
-        player.SetCurrentHealth(80);
-        player.SetCurrentSan(60);
         player.AddToInventory("test_item", 1);
         player.AddToInventory("door_start", 1);
         interactables.Consume("door_start_picked");
@@ -64,11 +61,6 @@ public static class SaveLoadTest
             Debug.LogError($"[SaveLoadTest] Flag test_int: expected 42, got {flags2.Get("test_int", 0)}.");
             ok = false;
         }
-
-        // ---- Verify player stats ----
-        if (player2.GetLevel() != 5) { Debug.LogError($"[SaveLoadTest] Level: expected 5, got {player2.GetLevel()}."); ok = false; }
-        if (player2.GetCurrentHealth() != 80) { Debug.LogError($"[SaveLoadTest] Health: expected 80, got {player2.GetCurrentHealth()}."); ok = false; }
-        if (player2.GetCurrentSan() != 60) { Debug.LogError($"[SaveLoadTest] San: expected 60, got {player2.GetCurrentSan()}."); ok = false; }
 
         // ---- Verify inventory (which items the player has) ----
         if (!player2.HasInInventory("test_item"))

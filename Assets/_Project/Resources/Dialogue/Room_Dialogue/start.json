@@ -1,0 +1,39 @@
+{
+  "dialogueID": "start",
+  "nodes": {
+    "start": { 
+      "speaker": "", 
+      "text": "...",
+      "nextNodeId": "dotdotdot"
+    },
+    "dotdotdot": {
+      "speaker": "",
+      "text": "......",
+      "nextNodeId": "start01"
+    },
+    "start01": {
+      "speaker": "",
+      "text": "头好痛......我这是在哪儿？",
+      "nextNodeId": "start02"
+    },
+    "start02": {
+      "speaker": "",
+      "text": "终于精神失常被抓进精神病院了吗...",
+      "nextNodeId": "start03"
+    },
+    "start03": {
+      "speaker": "",
+      "text": "好像也没什么不好的",
+      "nextNodeId": "start04"
+    },
+    "start04": {
+      "speaker": "",
+      "text": "什么也想不起来，先起床看看吧。",
+      "nextNodeId": "ending"
+    },
+    "ending": {
+      "speaker": "",
+      "text": "这屋子怎么只有床和一面镜子"
+    }
+  }
+}

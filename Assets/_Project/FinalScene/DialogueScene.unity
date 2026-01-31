@@ -376,7 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0.07460874, g: 0.025364893, b: 0.2830189, a: 0.95686275}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -457,6 +457,7 @@ MonoBehaviour:
   buttonSpacing: 10
   verticalLayout: 1
   choiceDelayAfterTypewriter: 0.3
+  choiceFont: {fileID: 11400000, guid: f4dc7e2124f0c4761a109ed7be01ea7a, type: 2}
 --- !u!114 &1383883761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -556,8 +557,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 009bf2e7d621745c3b0abf991099e9b2, type: 2}
-  m_sharedMaterial: {fileID: -384850092400919488, guid: 009bf2e7d621745c3b0abf991099e9b2, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f4dc7e2124f0c4761a109ed7be01ea7a, type: 2}
+  m_sharedMaterial: {fileID: 3267163405616926823, guid: f4dc7e2124f0c4761a109ed7be01ea7a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -785,6 +786,7 @@ MonoBehaviour:
   maxLinesProportion: 0.4
   lineSpacing: 1.2
   constrainTextBounds: 1
+  canvasRef: {fileID: 0}
 --- !u!1 &1686842848
 GameObject:
   m_ObjectHideFlags: 0

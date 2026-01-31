@@ -1,0 +1,9 @@
+{
+  "dialogueID": "mirror_start",
+  "nodes": {
+    "start": { 
+      "speaker": "...", 
+      "text": "不想看到自己的脸..."
+    }
+  }
+}
