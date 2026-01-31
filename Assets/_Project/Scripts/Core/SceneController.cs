@@ -18,10 +18,12 @@ public class SceneController : MonoBehaviour
     [SerializeField] private string dialogueSceneName = "DialogueScene";
     [SerializeField] private string cutsceneSceneName = "CutsceneScene";
 
+    [Header("References (assign in Bootstrap)")]
+    [SerializeField] private PauseUIController pauseUIController;
+
     private readonly HashSet<string> overlaysLoaded = new HashSet<string>();
     private string baseSceneLoaded = "";
     private Coroutine currentTransition = null;
-    private PauseUIController pauseUIController;
 
     private void Awake()
     {
@@ -31,7 +33,6 @@ public class SceneController : MonoBehaviour
     private void Start()
     {
         EventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
-        pauseUIController = FindObjectOfType<PauseUIController>();
 
         if (GameStateMachine.Instance != null)
             ApplyState(GameStateMachine.Instance.CurrentState);

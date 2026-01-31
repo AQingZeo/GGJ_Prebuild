@@ -22,6 +22,20 @@ public class DialogueManager : MonoBehaviour
         commandExecutor = new DialogueCommandExecutor();
     }
 
+    private void OnEnable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.Dialogue = this;
+            if (!string.IsNullOrEmpty(GameManager.Instance.PendingDialogueId))
+            {
+                string id = GameManager.Instance.PendingDialogueId;
+                GameManager.Instance.PendingDialogueId = null;
+                StartDialogue(id);
+            }
+        }
+    }
+
     private void Start()
     {
         SubscribeToEvents();
@@ -29,6 +43,8 @@ public class DialogueManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (GameManager.Instance != null && GameManager.Instance.Dialogue == this)
+            GameManager.Instance.Dialogue = null;
         UnsubscribeFromEvents();
     }
 

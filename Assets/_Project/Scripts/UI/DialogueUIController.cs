@@ -21,6 +21,9 @@ public class DialogueUIController : MonoBehaviour
     [SerializeField] private float lineSpacing = 1.2f;
     [SerializeField] private bool constrainTextBounds = true; // Ensure text stays within bounds
 
+    [Header("Optional (assign or uses parent Canvas)")]
+    [SerializeField] private Canvas canvasRef;
+
     private Canvas canvas;
     private RectTransform dialogueTextRect;
     private float baseFontSize;
@@ -29,10 +32,7 @@ public class DialogueUIController : MonoBehaviour
 
     private void Awake()
     {
-        // Get canvas for screen calculations
-        canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-            canvas = FindObjectOfType<Canvas>();
+        canvas = canvasRef != null ? canvasRef : GetComponentInParent<Canvas>();
 
         if (dialogueText != null)
         {

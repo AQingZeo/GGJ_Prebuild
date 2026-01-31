@@ -200,8 +200,9 @@ public class ChoiceUIController : MonoBehaviour
             return;
         }
 
-        // Set button text
-        TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
+        // Set button text (use ChoiceButtonView if present, else GetComponent on same object only)
+        var view = buttonObj.GetComponent<ChoiceButtonView>();
+        TMP_Text buttonText = view != null ? view.Text : buttonObj.GetComponent<TMP_Text>();
         if (buttonText != null)
         {
             buttonText.text = choiceText;

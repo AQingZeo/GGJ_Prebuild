@@ -17,6 +17,7 @@ public class SaveData
 {
     public List<FlagEntry> flags;
     public PlayerStateDataModel playerState;
+    public InteractablesSnapshot interactables;
 }
 
 public class SaveManager
@@ -24,24 +25,26 @@ public class SaveManager
     private const string SAVE_FILE_NAME = "savegame.json";
     private string SaveFilePath => Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
 
-    public void Save(FlagManager flagManager, PlayerState playerState)
+    public void Save(FlagManager flagManager, PlayerState playerState, InteractableSaveService interactables)
     {
         var flagsSnapshot = flagManager.Snapshot();
         var flagList = flagsSnapshot.Select(kvp => new FlagEntry { key = kvp.Key, value = kvp.Value }).ToList();
 
         var playerStateSnapshot = playerState.Snapshot();
+        var interactablesSnapshot = interactables?.Snapshot();
 
         var saveData = new SaveData
         {
             flags = flagList,
-            playerState = playerStateSnapshot
+            playerState = playerStateSnapshot,
+            interactables = interactablesSnapshot
         };
 
         string json = JsonUtility.ToJson(saveData, true);
         File.WriteAllText(SaveFilePath, json);
     }
 
-    public void Load(FlagManager flagManager, PlayerState playerState)
+    public void Load(FlagManager flagManager, PlayerState playerState, InteractableSaveService interactables)
     {
         if (!HasSave())
         {
@@ -60,6 +63,11 @@ public class SaveManager
         if (saveData.playerState != null && playerState != null)
         {
             playerState.LoadFromSnapshot(saveData.playerState);
+        }
+
+        if (saveData.interactables != null && interactables != null)
+        {
+            interactables.LoadFromSnapshot(saveData.interactables);
         }
     }
 

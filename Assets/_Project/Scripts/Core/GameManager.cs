@@ -2,16 +2,23 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using GameContracts;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IInteractableContext
 {
     public static GameManager Instance { get; private set; }
 
-    // Read-only accessors for Plain C# services
     public FlagManager Flags { get; private set; }
     public PlayerState Player { get; private set; }
     public SaveManager Save { get; private set; }
     public GameStateMachine StateMachine { get; private set; }
     public InventoryService Inventory { get; private set; }
+    public InteractableSaveService Interactables { get; private set; }
+
+    public DialogueManager Dialogue { get; set; }
+    public string PendingDialogueId { get; set; }
+    public RoomLoader RoomLoader { get; private set; }
+
+    /// <summary>Called by RoomLoader in ExploreScene on Awake/OnDestroy. No FindObjectOfType.</summary>
+    public void SetRoomLoader(RoomLoader loader) { RoomLoader = loader; }
 
     private void Awake()
     {
@@ -26,11 +33,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Bootstrap managers; inventory is empty (new) or filled later via LoadGame from PlayerState
         Flags = new FlagManager();
         Player = new PlayerState();
         Save = new SaveManager();
         Inventory = new InventoryService(Player);
+        Interactables = new InteractableSaveService();
 
         Debug.Log("<color=green>【GameManager】所有核心系统初始化完毕！</color>");
     }
@@ -59,6 +66,7 @@ public class GameManager : MonoBehaviour
         if (Player != null)
         {
             Player.NewGame();
+            Interactables?.NewGame();
             Debug.Log("<color=green>【GameManager】Player.NewGame() called</color>");
         }
         else
@@ -94,7 +102,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Save.Load(Flags, Player);
+        Save.Load(Flags, Player, Interactables);
         Inventory?.RaiseInventoryChanged();
 
         if (StateMachine != null)
@@ -114,7 +122,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Save.Save(Flags, Player);
+        Save.Save(Flags, Player, Interactables);
         Debug.Log("<color=cyan>【GameManager】游戏已保存</color>");
     }
 
