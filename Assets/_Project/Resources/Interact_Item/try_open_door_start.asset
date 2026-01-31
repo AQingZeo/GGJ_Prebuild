@@ -17,6 +17,31 @@ MonoBehaviour:
   oneShot: 0
   visibilityRules: []
   rules:
+  - when:
+    - type: 0
+      key: mask_00_on
+      expected: 1
+      intOp: 0
+      intValue: 0
+      itemId: 
+      count: 0
+      interactableId: 
+      stateOp: 0
+      stateValue: 0
+    doActions:
+    - type: 6
+      dialogueId: 
+      key: 
+      boolValue: 0
+      intValue: 0
+      useInt: 0
+      itemId: 
+      targetId: 
+      newState: 0
+      roomSceneName: Room_Water
+      spawnPoint: 
+      imageSprite: {fileID: 0}
+    stopAfterMatch: 1
   - when: []
     doActions:
     - type: 0
@@ -28,7 +53,6 @@ MonoBehaviour:
       itemId: 
       targetId: 
       newState: 0
-      maskId: 
       roomSceneName: 
       spawnPoint: 
       imageSprite: {fileID: 0}

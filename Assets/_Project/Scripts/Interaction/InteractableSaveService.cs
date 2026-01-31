@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using GameContracts;
 
 /// <summary>
 /// In-memory storage for consumed interactables and per-interactable state (int).
@@ -44,7 +45,10 @@ public class InteractableSaveService
     public void SetState(string id, int state)
     {
         if (!string.IsNullOrEmpty(id))
+        {
             _states[id] = state;
+            EventBus.Publish(new InteractableStateChanged(id, state));
+        }
     }
 
     public InteractablesSnapshot Snapshot()

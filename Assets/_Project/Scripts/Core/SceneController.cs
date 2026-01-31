@@ -17,6 +17,7 @@ public class SceneController : MonoBehaviour
     [Header("Overlay Scenes")]
     [SerializeField] private string dialogueSceneName = "DialogueScene";
     [SerializeField] private string cutsceneSceneName = "CutsceneScene";
+    [SerializeField] private string diarySceneName = "DiaryScene";
 
     [Header("References (assign in Bootstrap)")]
     [SerializeField] private PauseUIController pauseUIController;
@@ -81,6 +82,8 @@ public class SceneController : MonoBehaviour
             StartTransition(TransitionToDialogue());
         else if (state == GameState.CutScene)
             StartTransition(TransitionToCutscene());
+        else if (state == GameState.Diary) 
+            StartTransition(TransitionToDiary());
     }
 
     private IEnumerator TransitionToMenu()
@@ -118,7 +121,18 @@ public class SceneController : MonoBehaviour
             yield return StartCoroutine(UnloadOverlay(dialogueSceneName));
         yield return StartCoroutine(LoadOverlay(cutsceneSceneName));
     }
+    private IEnumerator TransitionToDiary()
+    {
+        if (baseSceneLoaded != exploreSceneName)
+            yield return StartCoroutine(LoadBaseScene(exploreSceneName));
 
+        if (overlaysLoaded.Contains(dialogueSceneName))
+            yield return StartCoroutine(UnloadOverlay(dialogueSceneName));
+        if (overlaysLoaded.Contains(cutsceneSceneName))
+            yield return StartCoroutine(UnloadOverlay(cutsceneSceneName));
+
+        yield return StartCoroutine(LoadOverlay(diarySceneName));
+    }
     private IEnumerator LoadBaseScene(string sceneName)
     {
         if (string.IsNullOrEmpty(sceneName)) yield break;

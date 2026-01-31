@@ -43,5 +43,17 @@ MonoBehaviour:
       roomSceneName: 
       spawnPoint: 
       imageSprite: {fileID: 0}
+    - type: 4
+      dialogueId: 
+      key: mask_00_on
+      boolValue: 1
+      intValue: 0
+      useInt: 0
+      itemId: 
+      targetId: door_start
+      newState: 1
+      roomSceneName: 
+      spawnPoint: 
+      imageSprite: {fileID: 0}
     stopAfterMatch: 0
   useItemRules: []

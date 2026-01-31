@@ -12,7 +12,8 @@ namespace GameContracts
         Menu,
         Pause,
         CutScene,
-        Dialogue
+        Dialogue,
+        Diary,
     }
 
     public enum WorldMode
@@ -94,6 +95,28 @@ namespace GameContracts
             SubmitDown = submitDown;
             ClickDown = clickDown;
             PointerScreen = pointerScreen;
+        }
+    }
+
+    public readonly struct InteractableStateChanged : IEvent
+    {
+        public readonly string Id;
+        public readonly int NewState;
+
+        public InteractableStateChanged(string id, int newState)
+        {
+            Id = id;
+            NewState = newState;
+        }
+    }
+
+    public readonly struct DialogueEnded : IEvent
+    {
+        public readonly string DialogueId;
+
+        public DialogueEnded(string dialogueId)
+        {
+            DialogueId = dialogueId;
         }
     }
 

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using GameContracts;
 
@@ -10,6 +12,8 @@ public class InteractableCore : MonoBehaviour
     private string _id;
     private bool _consumed;
     private bool _visible = true;
+    private bool _waitingForDialogue;
+    private Coroutine _actionCoroutine;
     private IInteractableContext Ctx => GameManager.Instance as IInteractableContext;
 
     private string ConsumedFlagKey => "consumed_" + _id;
@@ -19,7 +23,10 @@ public class InteractableCore : MonoBehaviour
         // Use idOverride if set, else def.id if set, else fallback to gameObject.name
         _id = !string.IsNullOrEmpty(idOverride) ? idOverride :
               (def != null && !string.IsNullOrEmpty(def.id)) ? def.id : gameObject.name;
+    }
 
+    private void Start()
+    {
         // Use flags for consumed state (flags serialize correctly)
         if (Ctx?.Flags != null && Ctx.Flags.Get(ConsumedFlagKey, false))
         {
@@ -28,15 +35,42 @@ public class InteractableCore : MonoBehaviour
             return;
         }
 
-        if (Ctx?.Interactables != null && visual != null)
-        {
-            int state = Ctx.Interactables.GetState(_id, 0);
-            visual.ApplyState(state);
-        }
+        // Apply saved visual state (Start ensures GameManager is ready)
+        ApplyVisualState();
 
         EvaluateVisibility();
         if (!_visible)
             gameObject.SetActive(false);
+
+        // Subscribe to state changes (for cross-interactable updates)
+        EventBus.Subscribe<InteractableStateChanged>(OnStateChanged);
+        EventBus.Subscribe<DialogueEnded>(OnDialogueEnded);
+    }
+
+    private void OnDestroy()
+    {
+        EventBus.Unsubscribe<InteractableStateChanged>(OnStateChanged);
+        EventBus.Unsubscribe<DialogueEnded>(OnDialogueEnded);
+    }
+
+    private void OnStateChanged(InteractableStateChanged e)
+    {
+        if (e.Id == _id && visual != null)
+            visual.ApplyState(e.NewState);
+    }
+
+    private void OnDialogueEnded(DialogueEnded e)
+    {
+        _waitingForDialogue = false;
+    }
+
+    private void ApplyVisualState()
+    {
+        if (visual != null && Ctx?.Interactables != null)
+        {
+            int state = Ctx.Interactables.GetState(_id, 0);
+            visual.ApplyState(state);
+        }
     }
 
     private void EvaluateVisibility()
@@ -83,12 +117,12 @@ public class InteractableCore : MonoBehaviour
     private void TryInteract(string selectedItemId)
     {
         if (_consumed || !_visible || Ctx == null) return;
+        if (_actionCoroutine != null) return; // Already executing actions
 
         bool useItemMode = !string.IsNullOrEmpty(selectedItemId);
         if (useItemMode)
         {
-            if (TryExecuteUseItemRules(selectedItemId))
-                return;
+            TryExecuteUseItemRules(selectedItemId);
             return;
         }
 
@@ -103,31 +137,22 @@ public class InteractableCore : MonoBehaviour
             }
             if (!allMatch) continue;
 
-            if (rule.doActions != null)
+            // Start coroutine to execute actions sequentially
+            if (rule.doActions != null && rule.doActions.Count > 0)
             {
-                foreach (var a in rule.doActions)
-                {
-                    if (a != null)
-                        SerializableAction.Execute(a, Ctx, _id, null);
-                }
+                _actionCoroutine = StartCoroutine(ExecuteActionsSequentially(rule.doActions, null, rule.stopAfterMatch));
             }
-
-            if (visual != null)
-                visual.ApplyState(Ctx.Interactables.GetState(_id, 0));
-
-            if (def.oneShot)
+            else
             {
-                Ctx.Flags?.Set(ConsumedFlagKey, true);
-                _consumed = true;
-                gameObject.SetActive(false);
+                FinishInteraction();
             }
-            if (rule.stopAfterMatch) return;
+            return; // Exit after first matching rule starts
         }
     }
 
-    private bool TryExecuteUseItemRules(string selectedItemId)
+    private void TryExecuteUseItemRules(string selectedItemId)
     {
-        if (def.useItemRules == null) return false;
+        if (def.useItemRules == null) return;
         foreach (var rule in def.useItemRules)
         {
             if (!string.IsNullOrEmpty(rule.itemId) && rule.itemId != selectedItemId) continue;
@@ -141,24 +166,66 @@ public class InteractableCore : MonoBehaviour
                 if (!allMatch) continue;
             }
 
-            if (rule.doActions != null)
+            // Start coroutine to execute actions sequentially
+            if (rule.doActions != null && rule.doActions.Count > 0)
             {
-                foreach (var a in rule.doActions)
-                {
-                    if (a != null)
-                        SerializableAction.Execute(a, Ctx, _id, selectedItemId);
-                }
+                _actionCoroutine = StartCoroutine(ExecuteActionsSequentially(rule.doActions, selectedItemId, true));
             }
+            else
+            {
+                // Handle inventory cleanup even if no actions
+                if (Ctx.Inventory != null && Ctx.Inventory.IsConsumeOnUse(selectedItemId))
+                    Ctx.Inventory.RemoveItem(selectedItemId);
+                Ctx.Inventory?.ClearSelection();
+            }
+            return;
+        }
+    }
 
+    private IEnumerator ExecuteActionsSequentially(List<SerializableAction> actions, string selectedItemId, bool stopAfterMatch)
+    {
+        foreach (var a in actions)
+        {
+            if (a == null) continue;
+
+            // Check if this is a StartDialogue action
+            bool isDialogueAction = (a.type == ActionType.StartDialogue && !string.IsNullOrEmpty(a.dialogueId));
+
+            if (isDialogueAction)
+                _waitingForDialogue = true;
+
+            SerializableAction.Execute(a, Ctx, _id, selectedItemId);
+
+            // Wait for dialogue to finish before continuing to next action
+            if (isDialogueAction)
+            {
+                while (_waitingForDialogue)
+                    yield return null;
+            }
+        }
+
+        // Handle inventory cleanup for use-item rules
+        if (!string.IsNullOrEmpty(selectedItemId))
+        {
             if (Ctx.Inventory != null && Ctx.Inventory.IsConsumeOnUse(selectedItemId))
                 Ctx.Inventory.RemoveItem(selectedItemId);
             Ctx.Inventory?.ClearSelection();
-
-            if (visual != null)
-                visual.ApplyState(Ctx.Interactables.GetState(_id, 0));
-
-            return true;
         }
-        return false;
+
+        FinishInteraction();
+        _actionCoroutine = null;
+    }
+
+    private void FinishInteraction()
+    {
+        if (visual != null)
+            visual.ApplyState(Ctx.Interactables.GetState(_id, 0));
+
+        if (def.oneShot)
+        {
+            Ctx.Flags?.Set(ConsumedFlagKey, true);
+            _consumed = true;
+            gameObject.SetActive(false);
+        }
     }
 }

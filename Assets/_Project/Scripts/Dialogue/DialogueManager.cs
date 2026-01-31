@@ -13,6 +13,7 @@ public class DialogueManager : MonoBehaviour
     private DialogueCommandExecutor commandExecutor;
     private DialogueDataModel currentDialogue;
     private string currentNodeId;
+    private string currentDialogueId;
     private bool isDialogueActive = false;
     private GameState previousState; // Store state before dialogue
 
@@ -115,6 +116,7 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        currentDialogueId = dialogueId;
         isDialogueActive = true;
         dialogueUIController.ClearHistory();
 
@@ -250,9 +252,12 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        string endedDialogueId = currentDialogueId;
+
         isDialogueActive = false;
         currentDialogue = null;
         currentNodeId = null;
+        currentDialogueId = null;
 
         dialogueUIController?.Hide();
         choiceUIController?.ClearChoices();
@@ -261,6 +266,9 @@ public class DialogueManager : MonoBehaviour
         {
             GameStateMachine.Instance.SetState(previousState);
         }
+
+        // Notify listeners that dialogue ended (for sequential action execution)
+        EventBus.Publish(new DialogueEnded(endedDialogueId));
     }
 
     /// <summary>

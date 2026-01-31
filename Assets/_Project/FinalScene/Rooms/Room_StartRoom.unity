@@ -364,7 +364,7 @@ SpriteRenderer:
   m_SortingLayerID: 1530473857
   m_SortingLayer: -1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 2792173d76a5f4d2ebe800b6b4b096cf, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -372,7 +372,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &493587975
@@ -403,8 +403,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   def: {fileID: 11400000, guid: 4e488a36466df4e32ba17523b1088da2, type: 2}
-  idOverride: 
-  visual: {fileID: 0}
+  idOverride: door_start
+  visual: {fileID: 493587977}
 --- !u!114 &493587977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -418,11 +418,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stateSprites:
-  - state: 0
-    sprite: {fileID: 0}
-  defaultSprite: {fileID: 0}
+  - state: 1
+    sprite: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  defaultSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   hideIfStateMissing: 0
-  spriteRenderer: {fileID: 0}
+  spriteRenderer: {fileID: 493587974}
   optionalCollider: {fileID: 0}
 --- !u!1 &1235475918
 GameObject:
