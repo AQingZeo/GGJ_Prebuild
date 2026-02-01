@@ -117,8 +117,18 @@ public class SerializableAction
     public string roomSceneName = "";
     public string spawnPoint = "";
     [Header("ImagePop")]
-    [Tooltip("Sprite to show as overlay when action runs. Assign in Interactable Definition.")]
+    [Tooltip("Content prefab to show in the pop (e.g. lock box). Uses the panel frame you set in ImagePop UI. Can use alone or with imageSprite.")]
+    public GameObject contentPrefab;
+    [Tooltip("Optional sprite in the Image component (e.g. background). Leave null if your panel is already the frame.")]
     public Sprite imageSprite;
+    [Tooltip("Puzzle prefab (e.g. dial box). When set, uses full puzzle mode; prefab calls NotifyPuzzleSolved() when solved.")]
+    public GameObject puzzlePrefab;
+    [Tooltip("Flag key to set to true when puzzle is solved.")]
+    public string solvedFlagKey = "";
+    [Tooltip("Interactable id to update visual state when solved (e.g. 'self' = this interactable).")]
+    public string solvedInteractableId = "self";
+    [Tooltip("State value to set on the interactable when puzzle is solved (for sprite swap).")]
+    public int solvedInteractableState = 1;
 
     public static void Execute(SerializableAction a, IInteractableContext ctx, string selfId, string selectedItemId)
     {
@@ -155,8 +165,16 @@ public class SerializableAction
                     ctx.RoomLoader?.LoadRoom(a.roomSceneName, string.IsNullOrEmpty(a.spawnPoint) ? null : a.spawnPoint);
                 break;
             case ActionType.ImagePop:
-                if (a.imageSprite != null)
-                    ctx.ImagePopController?.Show(a.imageSprite);
+                if (ctx.ImagePopController == null) break;
+                if (a.puzzlePrefab != null)
+                {
+                    string interactableId = (a.solvedInteractableId == "self" || string.IsNullOrEmpty(a.solvedInteractableId)) ? selfId : a.solvedInteractableId;
+                    ctx.ImagePopController.ShowPuzzle(a.puzzlePrefab, a.solvedFlagKey, interactableId, a.solvedInteractableState);
+                }
+                else if (a.imageSprite != null)
+                    ctx.ImagePopController.Show(a.imageSprite, a.contentPrefab);
+                else if (a.contentPrefab != null)
+                    ctx.ImagePopController.ShowContent(a.contentPrefab);
                 break;
         }
     }

@@ -12,6 +12,7 @@ public class InteractableCore : MonoBehaviour
     private string _id;
     private bool _consumed;
     private bool _visible = true;
+    private bool _playerInTrigger; // For Both: true only while player is colliding
     private bool _waitingForDialogue;
     private Coroutine _actionCoroutine;
     private IInteractableContext Ctx => GameManager.Instance as IInteractableContext;
@@ -103,13 +104,28 @@ public class InteractableCore : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (def == null || def.interactionType == InteractionType.ClickOnly) return;
+        if (def == null) return;
+        if (def.interactionType == InteractionType.ClickOnly) return;
+        if (def.interactionType == InteractionType.Both)
+        {
+            _playerInTrigger = true;
+            return;
+        }
+        // CollisionOnly: interact on enter
         TryInteract(Ctx?.Inventory?.SelectedItemId ?? "");
     }
 
-    private void OnMouseDown()
+    private void OnTriggerExit2D(Collider2D other)
     {
-        if (def == null || def.interactionType == InteractionType.CollisionOnly) return;
+        if (def == null || def.interactionType != InteractionType.Both) return;
+        _playerInTrigger = false;
+    }
+
+    private void OnMouseDown()
+    {   
+        if (def == null) return;
+        if (def.interactionType == InteractionType.CollisionOnly) return;
+        if (def.interactionType == InteractionType.Both && !_playerInTrigger) return; // Both: only interact when collide AND click
         if (Ctx?.StateMachine == null || Ctx.StateMachine.CurrentState != GameState.Explore) return;
         TryInteract(Ctx?.Inventory?.SelectedItemId ?? "");
     }

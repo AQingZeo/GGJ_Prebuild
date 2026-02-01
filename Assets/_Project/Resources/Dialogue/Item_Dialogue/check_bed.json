@@ -1,0 +1,9 @@
+{
+  "dialogueID": "check_bed",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "很薄的木床，上面铺着一些干草",
+    }
+  }
+}

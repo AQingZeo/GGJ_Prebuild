@@ -76,7 +76,10 @@ public class GameManager : MonoBehaviour, IInteractableContext
         {
             Debug.LogError("<color=red>【GameManager】Player is null!</color>");
         }
-        
+
+        // Clear saved room so Explore loads initial room, not a previous save's room
+        Flags.Set(RoomLoader.CurrentRoomFlagKey, "");
+
         // Ensure we have StateMachine reference (in case Start() hasn't run yet)
         if (StateMachine == null)
         {
@@ -107,6 +110,11 @@ public class GameManager : MonoBehaviour, IInteractableContext
 
         Save.Load(Flags, Player, Interactables);
         Inventory?.RaiseInventoryChanged();
+
+        // If already in Explore (e.g. load from pause), apply saved room so we're in the right place
+        string savedRoom = Flags.Get(RoomLoader.CurrentRoomFlagKey, "");
+        if (RoomLoader != null && !string.IsNullOrEmpty(savedRoom))
+            RoomLoader.LoadRoom(savedRoom, null);
 
         if (StateMachine != null)
         {

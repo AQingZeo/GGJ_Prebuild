@@ -79,10 +79,11 @@ public class DialogueManager : MonoBehaviour
         if (!isDialogueActive) return;
         if (GameStateMachine.Instance == null || GameStateMachine.Instance.CurrentState != GameState.Dialogue) return;
 
-        // If choices are visible, ignore input (choices are selected via UI buttons only)
-        if (HasChoices()) return;
+        // If choices are already shown, ignore advance (choices are selected via UI buttons only).
+        // Allow advance when there are more pages to show (so user can click through pages before choices).
+        if (HasChoices() && (dialogueUIController == null || !dialogueUIController.HasMorePages()))
+            return;
 
-        // Any button (submit or click) to advance dialogue
         if (inputIntent.SubmitDown || inputIntent.ClickDown)
         {
             SkipTypewriter();
@@ -396,14 +397,16 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        // Skip typewriter if it's currently typing
         if (dialogueUIController?.IsTyping() == true)
         {
             dialogueUIController.SkipTypewriter();
         }
+        else if (dialogueUIController != null && dialogueUIController.HasMorePages())
+        {
+            dialogueUIController.ShowNextPage();
+        }
         else if (!HasChoices())
         {
-            // If not typing and no choices, advance to next node
             Advance();
         }
         // If there are choices, do nothing - wait for user to select a choice

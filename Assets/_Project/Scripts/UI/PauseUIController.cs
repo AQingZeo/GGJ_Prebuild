@@ -13,8 +13,8 @@ public class PauseUIController : MonoBehaviour
 
     private void Awake()
     {
-        // Make PauseUIController persistent (Bootstrap should not be destroyed)
-        DontDestroyOnLoad(gameObject);
+        // DontDestroyOnLoad only works on root GameObjects; use the root of this object's hierarchy
+        DontDestroyOnLoad(transform.root.gameObject);
 
         // Get CanvasGroup if not assigned
         if (pauseCanvasGroup == null)

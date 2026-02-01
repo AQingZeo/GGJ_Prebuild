@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 968dbc964b74748c3a7ed0ccd9945b37, type: 3}
-  m_Name: poison
+  m_Name: remove_hay
   m_EditorClassIdentifier: 
-  id: poison
+  id: remove_hay
   interactionType: 0
   oneShot: 1
-  visibilityRules: []
+  visibilityRules:
+  - showWhen: []
+    hideWhen: []
   rules: []
   useItemRules: []
-  references:
-    version: 2
-    RefIds: []

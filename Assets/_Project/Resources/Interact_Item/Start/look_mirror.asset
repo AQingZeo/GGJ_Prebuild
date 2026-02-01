@@ -10,17 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 968dbc964b74748c3a7ed0ccd9945b37, type: 3}
-  m_Name: pickup_mask_00
+  m_Name: look_mirror
   m_EditorClassIdentifier: 
-  id: 
-  interactionType: 0
-  oneShot: 1
+  id: look_mirror
+  interactionType: 2
+  oneShot: 0
   visibilityRules: []
   rules:
-  - when: []
+  - when:
+    - type: 0
+      key: mask_00_on
+      expected: 1
+      intOp: 0
+      intValue: 0
+      itemId: 
+      count: 0
+      interactableId: 
+      stateOp: 0
+      stateValue: 0
     doActions:
     - type: 0
-      dialogueId: Item_Dialogue/mask_00_des
+      dialogueId: Item_Dialogue/mirror_mask_on
       key: 
       boolValue: 0
       intValue: 0
@@ -31,10 +41,17 @@ MonoBehaviour:
       roomSceneName: 
       spawnPoint: 
       imageSprite: {fileID: 0}
-    - type: 1
-      dialogueId: 
-      key: mask_00_on
-      boolValue: 1
+      puzzlePrefab: {fileID: 0}
+      solvedFlagKey: 
+      solvedInteractableId: self
+      solvedInteractableState: 1
+    stopAfterMatch: 1
+  - when: []
+    doActions:
+    - type: 0
+      dialogueId: Item_Dialogue/mirror_start
+      key: 
+      boolValue: 0
       intValue: 0
       useInt: 0
       itemId: 
@@ -43,17 +60,9 @@ MonoBehaviour:
       roomSceneName: 
       spawnPoint: 
       imageSprite: {fileID: 0}
-    - type: 4
-      dialogueId: 
-      key: mask_00_on
-      boolValue: 1
-      intValue: 0
-      useInt: 0
-      itemId: 
-      targetId: door_start
-      newState: 1
-      roomSceneName: 
-      spawnPoint: 
-      imageSprite: {fileID: 0}
+      puzzlePrefab: {fileID: 0}
+      solvedFlagKey: 
+      solvedInteractableId: self
+      solvedInteractableState: 1
     stopAfterMatch: 0
   useItemRules: []

@@ -18,6 +18,10 @@ public class RoomLoader : MonoBehaviour
     [Tooltip("Optional spawn point name in the initial room (e.g. Spawn_FromStartRoom).")]
     [SerializeField] private string initialSpawnPoint = "";
 
+    [Header("Transition")]
+    [Tooltip("Optional fade controller for room transitions.")]
+    [SerializeField] private RoomTransitionController transitionController;
+
 
     private string _currentRoomSceneName = "";
     private Coroutine _transition;
@@ -66,6 +70,9 @@ public class RoomLoader : MonoBehaviour
     {
         string previous = _currentRoomSceneName;
 
+        if (transitionController != null)
+            yield return transitionController.FadeOut();
+
         if (!string.IsNullOrEmpty(previous))
         {
             var unloadScene = SceneManager.GetSceneByName(previous);
@@ -108,6 +115,9 @@ public class RoomLoader : MonoBehaviour
                 }
             }
         }
+
+        if (transitionController != null)
+            yield return transitionController.FadeIn();
 
         _transition = null;
     }

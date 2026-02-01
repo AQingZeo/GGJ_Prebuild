@@ -1,0 +1,14 @@
+{
+  "dialogueID": "closet_closed",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "好像卡住了，打不开。。",
+      "nextNodeId": "try_harder"
+    },
+      "try_harder": {
+        "speaker": "李祓",
+        "text": "再试一次。。"
+      }
+    }
+}

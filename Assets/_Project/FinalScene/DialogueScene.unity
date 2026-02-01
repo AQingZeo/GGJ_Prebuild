@@ -256,74 +256,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 714872367}
   m_CullTransparentMesh: 1
---- !u!1 &906795086
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 906795089}
-  - component: {fileID: 906795088}
-  - component: {fileID: 906795087}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &906795087
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906795086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &906795088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906795086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &906795089
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906795086}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1190446497
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,6 +441,7 @@ GameObject:
   - component: {fileID: 1390746360}
   - component: {fileID: 1390746363}
   - component: {fileID: 1390746362}
+  - component: {fileID: 1390746364}
   m_Layer: 5
   m_Name: Dialogue
   m_TagString: Untagged
@@ -662,6 +595,20 @@ MonoBehaviour:
   maxSan: 100
   minSan: 0
   maxCorruptionChance: 0.3
+--- !u!114 &1390746364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390746358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15dbbb8b7a94f44293ed575704250db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  charactersPerSecond: 30
+  useUnscaledTime: 0
 --- !u!1 &1476024445
 GameObject:
   m_ObjectHideFlags: 0
@@ -775,17 +722,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1476024445}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32df68f5acba84b9c802722d944f86f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 400ac610e0dde43e08539b88c5289fd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dialoguePanel: {fileID: 1190446497}
   speakerNameText: {fileID: 714872369}
   dialogueText: {fileID: 1390746360}
   typewriterEffect: {fileID: 1390746362}
-  chaosEffect: {fileID: 1390746363}
+  chaosEffect: {fileID: 0}
   maxLinesProportion: 0.4
   lineSpacing: 1.2
   constrainTextBounds: 1
+  estimatedCharsPerLine: 40
+  maxCharsPerPageCap: 0
   canvasRef: {fileID: 0}
 --- !u!1 &1686842848
 GameObject:
@@ -914,5 +863,4 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1476024449}
-  - {fileID: 906795089}
   - {fileID: 1686842850}

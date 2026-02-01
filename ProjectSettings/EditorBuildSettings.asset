@@ -30,6 +30,9 @@ EditorBuildSettings:
     path: Assets/_Project/FinalScene/Rooms/Room_Water.unity
     guid: c2f5a7b9d3e15f7a0b1c4d6e8f2a3b5c
   - enabled: 1
-    path: Assets/_Project/FinalScene/Rooms/Room_Basement.unity
+    path: Assets/_Project/FinalScene/Rooms/Room_Main.unity
     guid: d3a6b8c0e4f26a8b1c2d5e7f9a3b4c6d
+  - enabled: 1
+    path: Assets/_Project/FinalScene/Rooms/Room_Side.unity
+    guid: b1ed42849709145adbf08d2f321a4530
   m_configObjects: {}
