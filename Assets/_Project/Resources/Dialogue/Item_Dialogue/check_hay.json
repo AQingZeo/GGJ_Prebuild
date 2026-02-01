@@ -1,0 +1,9 @@
+{
+  "dialogueID": "check_hay",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "干草下面似乎有什么东西。。"
+    }
+  }
+}

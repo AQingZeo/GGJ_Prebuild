@@ -12,27 +12,27 @@
       "nextNodeId": "start01"
     },
     "start01": {
-      "speaker": "",
+      "speaker": "李祓",
       "text": "头好痛......我这是在哪儿？",
       "nextNodeId": "start02"
     },
     "start02": {
-      "speaker": "",
+      "speaker": "李祓",
       "text": "终于精神失常被抓进精神病院了吗...",
       "nextNodeId": "start03"
     },
     "start03": {
-      "speaker": "",
+      "speaker": "李祓",
       "text": "好像也没什么不好的",
       "nextNodeId": "start04"
     },
     "start04": {
-      "speaker": "",
+      "speaker": "李祓",
       "text": "什么也想不起来，先起床看看吧。",
       "nextNodeId": "ending"
     },
     "ending": {
-      "speaker": "",
+      "speaker": "李祓",
       "text": "这屋子怎么只有床和一面镜子"
     }
   }
