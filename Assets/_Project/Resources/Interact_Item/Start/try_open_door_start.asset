@@ -39,7 +39,9 @@ MonoBehaviour:
       targetId: 
       newState: 0
       roomSceneName: Room_Water
-      spawnPoint: 
+      spawnPoint: Spawn_Water
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
       solvedFlagKey: 
@@ -59,6 +61,8 @@ MonoBehaviour:
       newState: 0
       roomSceneName: 
       spawnPoint: 
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
       solvedFlagKey: 

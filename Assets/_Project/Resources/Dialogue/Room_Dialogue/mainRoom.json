@@ -1,0 +1,59 @@
+{
+    "dialogueID": "mainRoom",
+    "nodes": {
+    "start": {
+        "speaker": "李祓",
+        "text": "发生了什么，我有点想吐…",
+        "nextNodeId": "heart_tight"
+    },
+    "heart_tight": {
+        "speaker": "李祓",
+        "text": "心脏像被狠狠攥住一样发紧。",
+        "nextNodeId": "color_change"
+    },
+    "color_change": {
+        "speaker": "李祓",
+        "text": "视线内的颜色好像不太一样了。",
+        "nextNodeId": "enter_main_room"
+    },
+    "enter_main_room": {
+      "speaker": "李祓",
+      "text": "……",
+      "nextNodeId": "accept_strange"
+    },
+    "accept_strange": {
+      "speaker": "李祓",
+      "text": "发生了太多奇怪的事，好像只能接受了。",
+      "nextNodeId": "want_to_leave"
+    },
+    "want_to_leave": {
+      "speaker": "李祓",
+      "text": "不过还是要尽快想办法离开这里。",
+      "nextNodeId": "mask_connection"
+    },
+    "mask_connection": {
+      "speaker": "李祓",
+      "text": "如果我刚才戴的一部分面具是李fu戴过的。",
+      "nextNodeId": "follow_li_fu"
+    },
+    "follow_li_fu": {
+      "speaker": "李祓",
+      "text": "要是真想离开这里说不定需要像李fu做一样的事…",
+      "nextNodeId": "calm_heartbeat"
+    },
+    "calm_heartbeat": {
+      "speaker": "李祓",
+      "text": "（努力吞着口水想要沉住心跳）",
+      "nextNodeId": "resist"
+    },
+    "resist": {
+      "speaker": "李祓",
+      "text": "呃…嗯…好抗拒",
+      "nextNodeId": "look_around_main"
+    },
+    "look_around_main": {
+      "speaker": "李祓",
+      "text": "先四处看看再说吧。"
+    }
+}
+}

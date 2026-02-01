@@ -57,7 +57,7 @@ MonoBehaviour:
       targetId: Lock_box
       newState: 1
       roomSceneName: Room_Main
-      spawnPoint: 
+      spawnPoint: Spawn_Main
       contentSprite: {fileID: 0}
       contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
