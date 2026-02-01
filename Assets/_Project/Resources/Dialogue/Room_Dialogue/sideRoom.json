@@ -1,0 +1,19 @@
+{
+    "dialogueID": "sideRoom",
+    "nodes": {
+    "enter_side_room": {
+      "speaker": "李祓",
+      "text": "你好… … 有人吗?",
+      "nextNodeId": "no_response"
+    },
+    "no_response": {
+      "speaker": "李祓",
+      "text": "没人回应，屋子里也都落灰了，看来是荒废的。",
+      "nextNodeId": "familiar_room"
+    },
+    "familiar_room": {
+      "speaker": "李祓",
+      "text": "这屋子看起来很熟悉…"
+    }
+}
+}

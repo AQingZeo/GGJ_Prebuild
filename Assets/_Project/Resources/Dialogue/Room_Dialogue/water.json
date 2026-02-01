@@ -1,0 +1,25 @@
+{
+    "dialogueID": "water",
+    "nodes": {
+        "start": {
+        "speaker": "李祓",
+        "text": "........",
+        "nextNodeId": "sleep_confuse"
+    },
+        "sleep_confuse": {
+        "speaker": "李祓",
+        "text": "是睡太久还是睡太少了…",
+        "nextNodeId": "abnormal_accept"
+    },
+        "waterway_confirm": {
+        "speaker": "李祓",
+        "text": "如果我没看错这是一条水路。"
+
+    },
+        "abnormal_accept": {
+        "speaker": "李祓",
+        "text": "不管是哪种情况我应该现在都不太正常了。",
+        "nextNodeId": "waterway_confirm"
+    }
+    }
+}

@@ -19,13 +19,17 @@ public class RoomTransitionController : MonoBehaviour
     {
         if (canvasGroup != null)
         {
-            canvasGroup.alpha = 0f;
-            canvasGroup.blocksRaycasts = false;
+            // Start blacked out so player/inventory aren't visible before room loads
+            canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = blockRaycastsDuringFade;
         }
     }
 
     public IEnumerator FadeOut()
     {
+        // Skip if already blacked out (e.g. first room load)
+        if (canvasGroup != null && canvasGroup.alpha >= 1f)
+            yield break;
         yield return FadeRoutine(0f, 1f);
     }
 
