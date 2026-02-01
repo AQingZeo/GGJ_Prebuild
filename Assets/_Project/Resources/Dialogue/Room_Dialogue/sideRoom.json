@@ -1,7 +1,7 @@
 {
     "dialogueID": "sideRoom",
     "nodes": {
-    "enter_side_room": {
+    "start": {
       "speaker": "李祓",
       "text": "你好… … 有人吗?",
       "nextNodeId": "no_response"

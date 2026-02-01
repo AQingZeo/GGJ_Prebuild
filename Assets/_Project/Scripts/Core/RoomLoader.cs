@@ -22,6 +22,12 @@ public class RoomLoader : MonoBehaviour
     [Tooltip("Optional fade controller for room transitions.")]
     [SerializeField] private RoomTransitionController transitionController;
 
+    [Header("Audio")]
+    [Tooltip("AudioSource used to play the room load sound.")]
+    [SerializeField] private AudioSource roomLoadAudioSource;
+    [Tooltip("Sound that plays each time a room finishes loading.")]
+    [SerializeField] private AudioClip roomLoadClip;
+
 
     private string _currentRoomSceneName = "";
     private Coroutine _transition;
@@ -30,6 +36,11 @@ public class RoomLoader : MonoBehaviour
     {
         if (GameManager.Instance != null)
             GameManager.Instance.SetRoomLoader(this);
+
+        if (roomLoadAudioSource == null)
+        {
+            roomLoadAudioSource = GetComponent<AudioSource>();
+        }
     }
 
     private void Start()
@@ -120,6 +131,8 @@ public class RoomLoader : MonoBehaviour
                 GameManager.Instance.Flags.Set(firstEnterKey, true);
         }
 
+        PlayRoomLoadSound();
+
         if (!string.IsNullOrEmpty(spawnPointName) && playerTransform != null)
         {
             var scene = SceneManager.GetSceneByName(roomSceneName);
@@ -152,5 +165,19 @@ public class RoomLoader : MonoBehaviour
             if (found != null) return found;
         }
         return null;
+    }
+
+    private void PlayRoomLoadSound()
+    {
+        if (roomLoadClip == null)
+            return;
+
+        if (roomLoadAudioSource == null)
+            roomLoadAudioSource = GetComponent<AudioSource>();
+
+        if (roomLoadAudioSource == null)
+            return;
+
+        roomLoadAudioSource.PlayOneShot(roomLoadClip);
     }
 }
