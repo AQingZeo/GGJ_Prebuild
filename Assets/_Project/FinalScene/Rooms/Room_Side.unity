@@ -329,7 +329,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 12.8, y: 7.2}
+  m_Size: {x: 3.83, y: 4.28}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -344,7 +344,7 @@ Transform:
   m_GameObject: {fileID: 366587064}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -2.87, y: 0.54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -383,6 +383,7 @@ MonoBehaviour:
   defaultSprite: {fileID: 21300000, guid: 79b133e35e2344999b053172606bf399, type: 3}
   hideIfStateMissing: 0
   spriteRenderer: {fileID: 366587065}
+  image: {fileID: 0}
   optionalCollider: {fileID: 0}
 --- !u!61 &366587069
 BoxCollider2D:
@@ -416,18 +417,18 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -3.7773676, y: 0.78198135}
+  m_Offset: {x: -0.4149685, y: -0.016477585}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 12.8, y: 7.2}
-    newSize: {x: 12.8, y: 7.2}
+    oldSize: {x: 3.83, y: 4.28}
+    newSize: {x: 3.83, y: 4.28}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.3824196, y: 3.8335035}
+  m_Size: {x: 2.7195466, y: 4.1174}
   m_EdgeRadius: 0
 --- !u!1 &983098656
 GameObject:
@@ -446,7 +447,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &983098657
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -624,7 +625,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 12.8, y: 7.2}
+  m_Size: {x: 4.63, y: 2.08}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -639,7 +640,7 @@ Transform:
   m_GameObject: {fileID: 1127078097}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2.71, y: -2.34, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -692,18 +693,18 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 2.7817507, y: -2.1206274}
+  m_Offset: {x: 0.14683628, y: 0.2126469}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 12.8, y: 7.2}
-    newSize: {x: 12.8, y: 7.2}
+    oldSize: {x: 4.63, y: 2.08}
+    newSize: {x: 4.63, y: 2.08}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.3663542, y: 1.9514475}
+  m_Size: {x: 3.3486109, y: 1.3659109}
   m_EdgeRadius: 0
 --- !u!1 &1238844399
 GameObject:
@@ -721,7 +722,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1238844400
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -938,7 +939,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 12.8, y: 7.2}
+  m_Size: {x: 6.4, y: 4.16}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -953,7 +954,7 @@ Transform:
   m_GameObject: {fileID: 1754654063}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 3.16, y: -1.47, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1006,18 +1007,18 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 5.55046, y: -0.9012344}
+  m_Offset: {x: 0.0056068897, y: -0.04954475}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 12.8, y: 7.2}
-    newSize: {x: 12.8, y: 7.2}
+    oldSize: {x: 6.4, y: 4.16}
+    newSize: {x: 6.4, y: 4.16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.6990814, y: 2.3648052}
+  m_Size: {x: 6.259169, y: 4.068184}
   m_EdgeRadius: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

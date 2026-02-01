@@ -89,7 +89,12 @@ public class SceneController : MonoBehaviour
     private IEnumerator TransitionToMenu()
     {
         if (baseSceneLoaded == exploreSceneName)
+        {
+            // Unload additively loaded room so it doesn't persist when we load from save later
+            if (GameManager.Instance?.RoomLoader != null)
+                yield return GameManager.Instance.RoomLoader.UnloadCurrentRoomAsync();
             yield return StartCoroutine(UnloadBaseScene(exploreSceneName));
+        }
         yield return StartCoroutine(UnloadAllOverlays());
         if (baseSceneLoaded != menuSceneName)
             yield return StartCoroutine(LoadBaseScene(menuSceneName));

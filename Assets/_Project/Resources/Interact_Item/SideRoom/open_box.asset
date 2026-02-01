@@ -17,25 +17,6 @@ MonoBehaviour:
   oneShot: 0
   visibilityRules: []
   rules:
-  - when: []
-    doActions:
-    - type: 4
-      dialogueId: 
-      key: 
-      boolValue: 0
-      intValue: 0
-      useInt: 0
-      itemId: 
-      targetId: Lock_box
-      newState: 1
-      roomSceneName: 
-      spawnPoint: 
-      imageSprite: {fileID: 0}
-      puzzlePrefab: {fileID: 0}
-      solvedFlagKey: 
-      solvedInteractableId: 
-      solvedInteractableState: 0
-    stopAfterMatch: 1
   - when:
     - type: 3
       key: 
@@ -49,7 +30,7 @@ MonoBehaviour:
       stateValue: 1
     doActions:
     - type: 0
-      dialogueId: Item_Dialogue/puton_mask_01
+      dialogueId: Item_Dialogue/mask_01_des
       key: 
       boolValue: 0
       intValue: 0
@@ -59,6 +40,8 @@ MonoBehaviour:
       newState: 1
       roomSceneName: 
       spawnPoint: 
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
       solvedFlagKey: 
@@ -75,6 +58,47 @@ MonoBehaviour:
       newState: 1
       roomSceneName: Room_Main
       spawnPoint: 
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
+      imageSprite: {fileID: 0}
+      puzzlePrefab: {fileID: 0}
+      solvedFlagKey: 
+      solvedInteractableId: 
+      solvedInteractableState: 0
+    - type: 8
+      dialogueId: Item_Dialogue/mask_01_des
+      key: 
+      boolValue: 0
+      intValue: 0
+      useInt: 0
+      itemId: 
+      targetId: Lock_box
+      newState: 1
+      roomSceneName: Room_Main
+      spawnPoint: 
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
+      imageSprite: {fileID: 0}
+      puzzlePrefab: {fileID: 0}
+      solvedFlagKey: 
+      solvedInteractableId: 
+      solvedInteractableState: 0
+    stopAfterMatch: 1
+  - when: []
+    doActions:
+    - type: 4
+      dialogueId: 
+      key: 
+      boolValue: 0
+      intValue: 0
+      useInt: 0
+      itemId: 
+      targetId: Lock_box
+      newState: 1
+      roomSceneName: 
+      spawnPoint: 
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
       solvedFlagKey: 

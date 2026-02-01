@@ -24,6 +24,14 @@ public class InteractableCore : MonoBehaviour
         // Use idOverride if set, else def.id if set, else fallback to gameObject.name
         _id = !string.IsNullOrEmpty(idOverride) ? idOverride :
               (def != null && !string.IsNullOrEmpty(def.id)) ? def.id : gameObject.name;
+
+        // InteractableCore uses OnTriggerEnter2D: colliders must be Is Trigger for CollisionOnly/Both
+        if (def != null && def.interactionType != InteractionType.ClickOnly)
+        {
+            var col = GetComponent<Collider2D>();
+            if (col != null && !col.isTrigger)
+                Debug.LogWarning($"InteractableCore '{_id}': Collider2D must have Is Trigger checked for {def.interactionType} to fire. Fix on: {gameObject.name}", this);
+        }
     }
 
     private void Start()
@@ -122,7 +130,7 @@ public class InteractableCore : MonoBehaviour
     }
 
     private void OnMouseDown()
-    {   
+    {
         if (def == null) return;
         if (def.interactionType == InteractionType.CollisionOnly) return;
         if (def.interactionType == InteractionType.Both && !_playerInTrigger) return; // Both: only interact when collide AND click

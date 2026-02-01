@@ -57,6 +57,27 @@ public class RoomLoader : MonoBehaviour
     }
 
     /// <summary>
+    /// Unload the currently loaded room scene (if any). Call when leaving Explore (e.g. going to menu) so the room is destroyed.
+    /// </summary>
+    public IEnumerator UnloadCurrentRoomAsync()
+    {
+        if (_transition != null)
+        {
+            StopCoroutine(_transition);
+            _transition = null;
+        }
+        string previous = _currentRoomSceneName;
+        _currentRoomSceneName = "";
+        if (string.IsNullOrEmpty(previous)) yield break;
+
+        var unloadScene = SceneManager.GetSceneByName(previous);
+        if (!unloadScene.isLoaded) yield break;
+
+        var op = SceneManager.UnloadSceneAsync(previous);
+        while (op != null && !op.isDone) yield return null;
+    }
+
+    /// <summary>
     /// Load room additively and unload previous room. Optional: move player to spawn point by name.
     /// </summary>
     public void LoadRoom(string roomSceneName, string spawnPointName = null)

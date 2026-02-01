@@ -4,16 +4,21 @@ using GameContracts;
 
 /// <summary>
 /// General pop overlay. The panel in the scene is the frame (you set it up once). Content comes from the interactable: contentPrefab (e.g. lock box), optional imageSprite, or puzzlePrefab.
+/// For interactable prefabs (with InteractableCore), assign worldContentAnchor so they spawn in world space and OnMouseDown works.
 /// </summary>
 public class ImagePopUIController : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject panel;
     [SerializeField] private Image image;
-    [Tooltip("Parent Transform where puzzle prefab is instantiated. Leave null if only using sprite mode.")]
+    [Tooltip("Parent Transform where UI puzzle prefab is instantiated (under Canvas). Leave null if only using sprite mode.")]
     [SerializeField] private Transform contentParent;
     [Tooltip("Button that closes the overlay. Assign in Inspector.")]
     [SerializeField] private Button closeButton;
+
+    [Header("World-Space Interactable Content")]
+    [Tooltip("Transform in WORLD SPACE (not under Canvas) where interactable prefabs spawn. Create an empty GameObject at the position you want (e.g. center of screen in world coords). If assigned, prefabs with InteractableCore spawn here so OnMouseDown works.")]
+    [SerializeField] private Transform worldContentAnchor;
 
     private GameObject _currentPuzzleInstance;
     private string _pendingSolvedFlagKey;
@@ -36,7 +41,7 @@ public class ImagePopUIController : MonoBehaviour
             GameManager.Instance.SetImagePopController(null);
     }
 
-    /// <summary>Show a sprite in the image. Optional contentPrefab is instantiated under contentParent (e.g. lock box) so content comes from interactable definition, not the scene.</summary>
+    /// <summary>Show a sprite in the image. Optional contentPrefab: if interactable and worldContentAnchor assigned, spawns in world space so OnMouseDown works.</summary>
     public void Show(Sprite sprite, GameObject contentPrefab = null)
     {
         ClearPuzzleInstance();
@@ -45,43 +50,102 @@ public class ImagePopUIController : MonoBehaviour
             image.gameObject.SetActive(true);
             image.sprite = sprite;
         }
-        if (contentParent != null)
+
+        if (contentPrefab != null)
         {
-            if (contentPrefab != null)
+            bool isInteractable = contentPrefab.GetComponent<InteractableCore>() != null
+                               || contentPrefab.GetComponentInChildren<InteractableCore>(true) != null;
+
+            if (isInteractable && worldContentAnchor != null)
+            {
+                _currentPuzzleInstance = Instantiate(contentPrefab, worldContentAnchor.position, worldContentAnchor.rotation);
+                _currentPuzzleInstance.SetActive(true);
+                if (contentParent != null)
+                    contentParent.gameObject.SetActive(false);
+            }
+            else if (contentParent != null)
             {
                 contentParent.gameObject.SetActive(true);
+                contentParent.SetAsLastSibling();
                 _currentPuzzleInstance = Instantiate(contentPrefab, contentParent);
                 _currentPuzzleInstance.SetActive(true);
                 StretchRectTransform(_currentPuzzleInstance.transform);
+                EnsureContentRendersAsUI(_currentPuzzleInstance);
             }
-            else
-                contentParent.gameObject.SetActive(false);
+        }
+        else if (contentParent != null)
+        {
+            contentParent.gameObject.SetActive(false);
+        }
+
+        if (panel != null)
+            panel.SetActive(true);
+    }
+
+    /// <summary>Show a sprite in the pop (e.g. lock box). Uses the panel's Image—same sprite asset as SpriteRenderer. Stretches the Image to fill the content area so the sprite isn't tiny in the center.</summary>
+    public void ShowContent(Sprite sprite)
+    {
+        ClearPuzzleInstance();
+        if (contentParent != null)
+            contentParent.gameObject.SetActive(false);
+        if (image != null)
+        {
+            image.gameObject.SetActive(true);
+            image.sprite = sprite;
+            image.preserveAspect = false;
+            var rect = image.rectTransform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
         if (panel != null)
             panel.SetActive(true);
     }
 
-    /// <summary>Show only content prefab (e.g. lock box). Panel is already the frame in scene; no image sprite. Use when you only set contentPrefab in the action.</summary>
+    /// <summary>Show content prefab (e.g. lock box). If prefab has InteractableCore and worldContentAnchor is assigned, spawns in world space so OnMouseDown works. Otherwise spawns under Canvas (display only).</summary>
     public void ShowContent(GameObject contentPrefab)
     {
         ClearPuzzleInstance();
         if (image != null)
             image.gameObject.SetActive(false);
-        if (contentParent == null)
-        {
-            Debug.LogWarning("ImagePopUIController: Content Parent is not assigned. Assign the Transform where content should appear (e.g. child of panel).");
-        }
-        else if (contentPrefab == null)
+
+        if (contentPrefab == null)
         {
             Debug.LogWarning("ImagePopUIController: Content Prefab is null. Assign the lock box (or content) prefab in the interactable's ImagePop action.");
+            if (panel != null) panel.SetActive(true);
+            return;
+        }
+
+        // Check if prefab is interactable (has InteractableCore or Collider2D)
+        bool isInteractable = contentPrefab.GetComponent<InteractableCore>() != null
+                           || contentPrefab.GetComponentInChildren<InteractableCore>(true) != null;
+
+        if (isInteractable && worldContentAnchor != null)
+        {
+            // Spawn in world space so OnMouseDown works (sorting layer/order from prefab)
+            _currentPuzzleInstance = Instantiate(contentPrefab, worldContentAnchor.position, worldContentAnchor.rotation);
+            _currentPuzzleInstance.SetActive(true);
+            if (contentParent != null)
+                contentParent.gameObject.SetActive(false);
         }
         else
         {
+            // Spawn under Canvas (UI mode, display only)
+            if (contentParent == null)
+            {
+                Debug.LogWarning("ImagePopUIController: Content Parent is not assigned. Assign the Transform where content should appear (e.g. child of panel).");
+                if (panel != null) panel.SetActive(true);
+                return;
+            }
             contentParent.gameObject.SetActive(true);
+            contentParent.SetAsLastSibling();
             _currentPuzzleInstance = Instantiate(contentPrefab, contentParent);
             _currentPuzzleInstance.SetActive(true);
             StretchRectTransform(_currentPuzzleInstance.transform);
+            EnsureContentRendersAsUI(_currentPuzzleInstance);
         }
+
         if (panel != null)
             panel.SetActive(true);
     }
@@ -154,6 +218,31 @@ public class ImagePopUIController : MonoBehaviour
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         rect.localScale = Vector3.one;
+    }
+
+    /// <summary>If the content prefab uses SpriteRenderer, convert it to UI Image so it renders on the Canvas (on top of the overlay frame) and is visible in Game view. Display only—no state sync.</summary>
+    private static void EnsureContentRendersAsUI(GameObject instance)
+    {
+        var sr = instance.GetComponent<SpriteRenderer>();
+        if (sr == null && instance.transform.childCount > 0)
+            sr = instance.transform.GetChild(0).GetComponent<SpriteRenderer>();
+        if (sr == null || sr.sprite == null) return;
+
+        Sprite sprite = sr.sprite;
+        Transform target = sr.transform;
+        var rect = target as RectTransform ?? target.GetComponent<RectTransform>();
+        if (rect == null) return;
+
+        var img = target.GetComponent<Image>();
+        if (img == null)
+            img = target.gameObject.AddComponent<Image>();
+        img.sprite = sprite;
+        img.raycastTarget = false;
+        img.preserveAspect = true;
+
+        sr.enabled = false;
+        foreach (var other in instance.GetComponentsInChildren<SpriteRenderer>(true))
+            other.enabled = false;
     }
 
     private void ClearPuzzleInstance()

@@ -40,7 +40,8 @@ MonoBehaviour:
       newState: 0
       roomSceneName: 
       spawnPoint: 
-      contentPrefab: {fileID: 1994041704262425781, guid: ce5237e98008e46f7943e9083a87eb01, type: 3}
+      contentSprite: {fileID: 0}
+      contentPrefab: {fileID: 7838583217568878634, guid: 7648164fe8300c549b2bc88be210ca74, type: 3}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
       solvedFlagKey: 
@@ -60,6 +61,7 @@ MonoBehaviour:
       newState: 0
       roomSceneName: 
       spawnPoint: 
+      contentSprite: {fileID: 0}
       contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}
@@ -77,6 +79,7 @@ MonoBehaviour:
       newState: 1
       roomSceneName: 
       spawnPoint: 
+      contentSprite: {fileID: 0}
       contentPrefab: {fileID: 0}
       imageSprite: {fileID: 0}
       puzzlePrefab: {fileID: 0}

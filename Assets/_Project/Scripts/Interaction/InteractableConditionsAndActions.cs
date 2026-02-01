@@ -36,7 +36,8 @@ public enum ActionType
     SetInteractableState,
     ConsumeInteractable,
     LoadRoom,
-    ImagePop
+    ImagePop,
+    CloseImagePop
 }
 
 [Serializable]
@@ -117,9 +118,11 @@ public class SerializableAction
     public string roomSceneName = "";
     public string spawnPoint = "";
     [Header("ImagePop")]
-    [Tooltip("Content prefab to show in the pop (e.g. lock box). Uses the panel frame you set in ImagePop UI. Can use alone or with imageSprite.")]
+    [Tooltip("Content sprite to show in the pop (e.g. lock box). Same sprite asset as SpriteRenderer—displayed in the pop's Image. Easiest: assign only this.")]
+    public Sprite contentSprite;
+    [Tooltip("Content prefab (optional). Use if you need a full prefab instead of a single sprite.")]
     public GameObject contentPrefab;
-    [Tooltip("Optional sprite in the Image component (e.g. background). Leave null if your panel is already the frame.")]
+    [Tooltip("Optional background sprite in the Image. Leave null if your panel is already the frame.")]
     public Sprite imageSprite;
     [Tooltip("Puzzle prefab (e.g. dial box). When set, uses full puzzle mode; prefab calls NotifyPuzzleSolved() when solved.")]
     public GameObject puzzlePrefab;
@@ -171,10 +174,15 @@ public class SerializableAction
                     string interactableId = (a.solvedInteractableId == "self" || string.IsNullOrEmpty(a.solvedInteractableId)) ? selfId : a.solvedInteractableId;
                     ctx.ImagePopController.ShowPuzzle(a.puzzlePrefab, a.solvedFlagKey, interactableId, a.solvedInteractableState);
                 }
+                else if (a.contentSprite != null)
+                    ctx.ImagePopController.ShowContent(a.contentSprite);
                 else if (a.imageSprite != null)
                     ctx.ImagePopController.Show(a.imageSprite, a.contentPrefab);
                 else if (a.contentPrefab != null)
                     ctx.ImagePopController.ShowContent(a.contentPrefab);
+                break;
+            case ActionType.CloseImagePop:
+                ctx.ImagePopController?.Hide();
                 break;
         }
     }
