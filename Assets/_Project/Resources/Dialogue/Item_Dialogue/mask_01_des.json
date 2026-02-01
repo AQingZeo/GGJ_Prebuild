@@ -1,0 +1,19 @@
+{
+  "dialogueID": "mask_00_des",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "又一个面具...吗",
+      "nextNodeId": "puton"
+    },
+    "puton": {
+      "speaker": "李祓",
+      "text": "这次也要选择戴上面具吗？？",
+      "nextNodeId": "feeling"
+    },
+    "feeling": {
+      "speaker": "...",
+      "text": "。。。(没反应过来就又已经戴上了面具)"
+    }
+  }
+}

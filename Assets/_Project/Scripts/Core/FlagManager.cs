@@ -40,28 +40,22 @@ public class FlagManager
 
     public bool Get(string key, bool defaultValue = false)
     {
-        if (_flags.TryGetValue(key, out FlagValueDto value) && value.Type == FlagValueType.Bool)
-        {
+        if (_flags.TryGetValue(key, out FlagValueDto value) && value != null && value.Type == FlagValueType.Bool)
             return value.BoolValue;
-        }
         return defaultValue;
     }
 
     public int Get(string key, int defaultValue = 0)
     {
-        if (_flags.TryGetValue(key, out FlagValueDto value) && value.Type == FlagValueType.Int)
-        {
+        if (_flags.TryGetValue(key, out FlagValueDto value) && value != null && value.Type == FlagValueType.Int)
             return value.IntValue;
-        }
         return defaultValue;
     }
 
     public string Get(string key, string defaultValue = "")
     {
-        if (_flags.TryGetValue(key, out FlagValueDto value) && value.Type == FlagValueType.String)
-        {
+        if (_flags.TryGetValue(key, out FlagValueDto value) && value != null && value.Type == FlagValueType.String)
             return value.StringValue;
-        }
         return defaultValue;
     }
 

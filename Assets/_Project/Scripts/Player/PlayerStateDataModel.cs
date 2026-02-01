@@ -1,18 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Define the data model for player's stats with Default/initialized value.
-/// Keep Dictionary of Inventory.
+/// Data model for player save/load. Only inventoryIds is serialized.
+/// (Level, health, sanity, masks are not used; masks are flags e.g. mask_00_on.)
 /// </summary>
-[System.Serializable]
+[Serializable]
 public class PlayerStateDataModel
 {
-    public int level = 0;
-    public int maxHealth = 100;
-    public int currentHealth = 100;
-    public int currentSan = 70;
-    public int minSan = 0;
-    
-    public Dictionary<string, object> inventory = new Dictionary<string, object>();
+    /// <summary>Serialized to save file. Items are pickup-once; runtime inventory rebuilt from this on load.</summary>
+    public List<string> inventoryIds = new List<string>();
 }

@@ -19,6 +19,8 @@ public class ChoiceUIController : MonoBehaviour
     [SerializeField] private float buttonSpacing = 10f;
     [SerializeField] private bool verticalLayout = true;
     [SerializeField] private float choiceDelayAfterTypewriter = 0.3f; // Delay before showing choices (seconds)
+    [Tooltip("Optional. Assign to match dialogue font or style. Applied to choice button text.")]
+    [SerializeField] private TMP_FontAsset choiceFont;
 
     private List<GameObject> currentChoiceButtons = new List<GameObject>();
     private VerticalLayoutGroup verticalLayoutGroup;
@@ -125,10 +127,12 @@ public class ChoiceUIController : MonoBehaviour
         // ===== TEXT APPEARANCE =====
         TMP_Text buttonText = textObj.AddComponent<TextMeshProUGUI>();
         buttonText.text = "Choice";
-        buttonText.fontSize = 22;                                  // Font size
-        buttonText.alignment = TextAlignmentOptions.Center;        // Text alignment
-        buttonText.color = new Color(0.95f, 0.95f, 1f, 1f);       // Off-white
-        buttonText.fontStyle = FontStyles.Normal;                  // Style (Normal, Bold, Italic)
+        buttonText.fontSize = 22;
+        buttonText.alignment = TextAlignmentOptions.Center;
+        buttonText.color = new Color(0.95f, 0.95f, 1f, 1f);
+        buttonText.fontStyle = FontStyles.Normal;
+        if (choiceFont != null)
+            buttonText.font = choiceFont;
 
         // Set as prefab reference (this will be used as template)
         choiceButtonPrefab = buttonObj;
@@ -200,11 +204,14 @@ public class ChoiceUIController : MonoBehaviour
             return;
         }
 
-        // Set button text
-        TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
+        // Set button text (use ChoiceButtonView if present, else GetComponent on same object only)
+        var view = buttonObj.GetComponent<ChoiceButtonView>();
+        TMP_Text buttonText = view != null ? view.Text : buttonObj.GetComponentInChildren<TMP_Text>(true);
         if (buttonText != null)
         {
             buttonText.text = choiceText;
+            if (choiceFont != null)
+                buttonText.font = choiceFont;
         }
 
         // Add click listener

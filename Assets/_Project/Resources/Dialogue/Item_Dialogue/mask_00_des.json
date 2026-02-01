@@ -1,0 +1,29 @@
+{
+  "dialogueID": "mask_00_des",
+  "nodes": {
+    "start": { 
+      "speaker": "...", 
+      "text": "一个白色的面具，上面带着特别的凸起和凹陷的纹路",
+      "nextNodeId": "puton"
+    },
+    "puton": {
+      "speaker": "李祓",
+      "text": "不知道为什么这面具给我的感觉不太舒服",
+      "choices": [
+        {
+          "text": "佩戴",
+          "nextNodeId": "feeling"
+        }
+      ]
+    },
+    "feeling": {
+      "speaker": "李祓",
+      "text": "...这是什么时候练出来的肌肉记忆？",
+      "nextNodeId": "feeling_end"
+    },
+    "feeling_end": {
+      "speaker": "...",
+      "text": "(没反应过来就已经戴上了面具)"
+    }
+  }
+}

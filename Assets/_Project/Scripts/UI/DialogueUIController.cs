@@ -4,8 +4,8 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Controls the dialogue UI panel, displaying speaker name and dialogue text.
-/// Has proportional clamp on how many lines of text to display.
+/// Controls the dialogue UI panel. Text that doesn't fit (overflow) is split into pages;
+/// click advances to next page. Choices and following nodes run only after the full line (all pages) are finished.
 /// </summary>
 public class DialogueUIController : MonoBehaviour
 {
@@ -20,6 +20,13 @@ public class DialogueUIController : MonoBehaviour
     [SerializeField] private float maxLinesProportion = 0.4f; // Max 40% of screen height for dialogue text
     [SerializeField] private float lineSpacing = 1.2f;
     [SerializeField] private bool constrainTextBounds = true; // Ensure text stays within bounds
+    [Tooltip("Approximate characters per line for paging. Overflow goes to next page; lower = more pages.")]
+    [SerializeField] private int estimatedCharsPerLine = 40;
+    [Tooltip("Max chars per page (0 = use maxVisibleLines * estimatedCharsPerLine only). Set e.g. 18–24 to split long lines into pages; 0 = show full line (may truncate if panel is small).")]
+    [SerializeField] private int maxCharsPerPageCap = 0;
+
+    [Header("Optional (assign or uses parent Canvas)")]
+    [SerializeField] private Canvas canvasRef;
 
     private Canvas canvas;
     private RectTransform dialogueTextRect;
@@ -27,23 +34,25 @@ public class DialogueUIController : MonoBehaviour
     private List<string> dialogueHistory = new List<string>();
     private int maxVisibleLines;
 
+    // Paging: when one line doesn't fit, split into pages; click advances to next page
+    private List<string> _pagedPages;
+    private int _pagedIndex;
+    private string _pagedFullText;
+    private System.Action _pagedOnComplete;
+
     private void Awake()
     {
-        // Get canvas for screen calculations
-        canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-            canvas = FindObjectOfType<Canvas>();
+        canvas = canvasRef != null ? canvasRef : GetComponentInParent<Canvas>();
 
         if (dialogueText != null)
         {
             dialogueTextRect = dialogueText.GetComponent<RectTransform>();
             baseFontSize = dialogueText.fontSize;
             
-            // Ensure text is constrained to bounds
-            if (constrainTextBounds && dialogueTextRect != null)
+            if (dialogueTextRect != null)
             {
-                dialogueText.overflowMode = TextOverflowModes.Truncate;
                 dialogueText.enableWordWrapping = true;
+                dialogueText.overflowMode = constrainTextBounds ? TextOverflowModes.Truncate : TextOverflowModes.Overflow;
             }
         }
 
@@ -85,11 +94,11 @@ public class DialogueUIController : MonoBehaviour
 
     /// <summary>
     /// Display a dialogue line with speaker name and text.
-    /// Called by DialogueManager to show dialogue content.
+    /// Long lines are split into pages; click advances to next page before advancing to next node.
     /// </summary>
     /// <param name="speaker">Speaker name</param>
     /// <param name="text">Dialogue text</param>
-    /// <param name="onComplete">Optional callback when typewriter completes</param>
+    /// <param name="onComplete">Optional callback when typewriter completes (and all pages shown if paged)</param>
     public void ShowLine(string speaker, string text, System.Action onComplete = null)
     {
         if (dialoguePanel != null)
@@ -103,40 +112,172 @@ public class DialogueUIController : MonoBehaviour
             speakerNameText.text = string.IsNullOrEmpty(speaker) ? "" : speaker;
         }
 
-        // Add to history
-        if (!string.IsNullOrEmpty(text))
+        if (string.IsNullOrEmpty(text))
         {
+            onComplete?.Invoke();
+            return;
+        }
+
+        List<string> pages = SplitTextIntoPages(text);
+        if (pages.Count <= 1)
+        {
+            // Fits in one page: current behavior
             dialogueHistory.Add(text);
+            ClampDialogueHistory();
+            string displayText = BuildDisplayText();
+            StartTypewriterForText(displayText, onComplete);
+            return;
         }
 
-        // Clamp dialogue history to max visible lines
-        ClampDialogueHistory();
+        // Multiple pages: show first page, wait for click to show next
+        _pagedPages = pages;
+        _pagedIndex = 0;
+        _pagedFullText = text;
+        _pagedOnComplete = onComplete;
+        StartTypewriterForText(_pagedPages[0], OnPageTypedComplete);
+    }
 
-        // Build display text from history
-        string displayText = BuildDisplayText();
+    /// <summary>
+    /// Start typewriter with optional chaos transform; used by ShowLine and ShowNextPage.
+    /// </summary>
+    private void StartTypewriterForText(string text, System.Action onComplete)
+    {
+        if (dialogueText == null) return;
 
-        // Update dialogue text and start typewriter
-        if (dialogueText != null)
+        if (typewriterEffect != null)
         {
-            if (typewriterEffect != null)
+            System.Func<char, int, char> characterTransform = null;
+            if (chaosEffect != null && chaosEffect.ShouldApplyChaos())
             {
-                // Get chaos transformation if ChaosEffect is available and should be applied
-                System.Func<char, int, char> characterTransform = null;
-                if (chaosEffect != null && chaosEffect.ShouldApplyChaos())
-                {
-                    characterTransform = chaosEffect.GetCharacterTransform();
-                }
-                
-                // Use typewriter effect with callback and optional chaos transformation
-                typewriterEffect.StartTyping(displayText, onComplete, characterTransform);
+                characterTransform = chaosEffect.GetCharacterTransform();
             }
-            else
+            typewriterEffect.StartTyping(text, onComplete, characterTransform);
+        }
+        else
+        {
+            dialogueText.text = text;
+            onComplete?.Invoke();
+        }
+    }
+
+    private void OnPageTypedComplete()
+    {
+        if (_pagedPages == null) return;
+
+        if (_pagedIndex >= _pagedPages.Count - 1)
+        {
+            dialogueHistory.Add(_pagedFullText);
+            ClampDialogueHistory();
+            var callback = _pagedOnComplete;
+            ClearPagingState();
+            callback?.Invoke();
+        }
+        // Else: more pages; wait for user click -> ShowNextPage
+    }
+
+    private void ClearPagingState()
+    {
+        _pagedPages = null;
+        _pagedIndex = 0;
+        _pagedFullText = null;
+        _pagedOnComplete = null;
+    }
+
+    /// <summary>
+    /// True when a long line was split into pages and not all pages have been shown yet.
+    /// </summary>
+    public bool HasMorePages()
+    {
+        return _pagedPages != null && _pagedIndex < _pagedPages.Count - 1;
+    }
+
+    /// <summary>
+    /// Advance to the next page of the current line (call when not typing and HasMorePages).
+    /// </summary>
+    public void ShowNextPage()
+    {
+        if (!HasMorePages()) return;
+        _pagedIndex++;
+        StartTypewriterForText(_pagedPages[_pagedIndex], OnPageTypedComplete);
+    }
+
+    /// <summary>
+    /// Split text into page-sized chunks so each fits in the visible window.
+    /// </summary>
+    private List<string> SplitTextIntoPages(string text)
+    {
+        int calculated = maxVisibleLines * estimatedCharsPerLine;
+        int maxCharsPerPage = maxCharsPerPageCap > 0
+            ? Mathf.Max(1, Mathf.Min(calculated, maxCharsPerPageCap))
+            : Mathf.Max(1, calculated);
+        var pages = new List<string>();
+
+        // Split by newlines first, then recombine into page-sized chunks
+        string[] paragraphs = text.Split('\n');
+        var currentPage = new System.Text.StringBuilder();
+
+        foreach (string para in paragraphs)
+        {
+            if (currentPage.Length > 0)
             {
-                // Fallback: show text immediately and call callback
-                dialogueText.text = displayText;
-                onComplete?.Invoke();
+                currentPage.Append('\n');
+            }
+
+            if (para.Length <= maxCharsPerPage && currentPage.Length + para.Length <= maxCharsPerPage)
+            {
+                currentPage.Append(para);
+                continue;
+            }
+
+            // Flush current page if adding this para would exceed
+            if (currentPage.Length + para.Length > maxCharsPerPage && currentPage.Length > 0)
+            {
+                pages.Add(currentPage.ToString().TrimEnd());
+                currentPage.Clear();
+            }
+
+            // Break long paragraph by character count at word boundaries
+            int start = 0;
+            while (start < para.Length)
+            {
+                int take = Mathf.Min(maxCharsPerPage - currentPage.Length, para.Length - start);
+                if (take <= 0)
+                {
+                    pages.Add(currentPage.ToString().TrimEnd());
+                    currentPage.Clear();
+                    take = Mathf.Min(maxCharsPerPage, para.Length - start);
+                }
+
+                int end = start + take;
+                if (end < para.Length)
+                {
+                    int lastSpace = para.LastIndexOf(' ', end - 1, take);
+                    if (lastSpace >= start)
+                    {
+                        end = lastSpace + 1;
+                    }
+                }
+
+                currentPage.Append(para.Substring(start, end - start));
+                start = end;
+                if (start < para.Length && para[start] == ' ')
+                {
+                    start++;
+                }
+                if (currentPage.Length >= maxCharsPerPage || start >= para.Length)
+                {
+                    pages.Add(currentPage.ToString().TrimEnd());
+                    currentPage.Clear();
+                }
             }
         }
+
+        if (currentPage.Length > 0)
+        {
+            pages.Add(currentPage.ToString().TrimEnd());
+        }
+
+        return pages.Count > 0 ? pages : new List<string> { text };
     }
 
     /// <summary>
@@ -172,13 +313,11 @@ public class DialogueUIController : MonoBehaviour
     /// </summary>
     public void Hide()
     {
-        // Stop typewriter if running
         if (typewriterEffect != null)
         {
             typewriterEffect.StopTyping();
         }
-
-        // Clear dialogue history
+        ClearPagingState();
         dialogueHistory.Clear();
 
         // Clear text
@@ -223,12 +362,11 @@ public class DialogueUIController : MonoBehaviour
     /// </summary>
     public void ClearHistory()
     {
-        // Stop typewriter if running to prevent duplicate text
         if (typewriterEffect != null)
         {
             typewriterEffect.StopTyping();
         }
-        
+        ClearPagingState();
         dialogueHistory.Clear();
         if (dialogueText != null)
         {

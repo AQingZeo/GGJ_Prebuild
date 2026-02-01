@@ -1,0 +1,9 @@
+{
+  "dialogueID": "mirror_mask_on",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "这样看起来顺眼多了"
+    }
+  }
+}

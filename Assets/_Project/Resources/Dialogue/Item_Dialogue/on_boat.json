@@ -1,0 +1,19 @@
+{
+  "dialogueID": "on_boat",
+  "nodes": {
+    "start": { 
+      "speaker": "李祓", 
+      "text": "既然这样。。就随着水流走吧，没有什么值得回头看的",
+      "choices": [
+        {
+          "text": "上船",
+          "nextNodeId": "geton"
+        }
+      ]
+    },
+    "geton": {
+      "speaker": "",
+      "text": "(船还真的开动了。。。)"
+    }
+  }
+}

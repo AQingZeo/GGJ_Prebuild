@@ -2,16 +2,26 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using GameContracts;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IInteractableContext
 {
     public static GameManager Instance { get; private set; }
 
-    // Read-only accessors for Plain C# services
     public FlagManager Flags { get; private set; }
     public PlayerState Player { get; private set; }
     public SaveManager Save { get; private set; }
     public GameStateMachine StateMachine { get; private set; }
     public InventoryService Inventory { get; private set; }
+    public InteractableSaveService Interactables { get; private set; }
+
+    public DialogueManager Dialogue { get; set; }
+    public string PendingDialogueId { get; set; }
+    public RoomLoader RoomLoader { get; private set; }
+    public ImagePopUIController ImagePopController { get; private set; }
+
+    /// <summary>Called by RoomLoader in ExploreScene on Awake/OnDestroy. No FindObjectOfType.</summary>
+    public void SetRoomLoader(RoomLoader loader) { RoomLoader = loader; }
+    /// <summary>Called by ImagePopUIController on Awake/OnDestroy. No FindObjectOfType.</summary>
+    public void SetImagePopController(ImagePopUIController c) { ImagePopController = c; }
 
     private void Awake()
     {
@@ -26,11 +36,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Bootstrap managers; inventory is empty (new) or filled later via LoadGame from PlayerState
         Flags = new FlagManager();
         Player = new PlayerState();
         Save = new SaveManager();
         Inventory = new InventoryService(Player);
+        Interactables = new InteractableSaveService();
 
         Debug.Log("<color=green>【GameManager】所有核心系统初始化完毕！</color>");
     }
@@ -59,13 +69,17 @@ public class GameManager : MonoBehaviour
         if (Player != null)
         {
             Player.NewGame();
+            Interactables?.NewGame();
             Debug.Log("<color=green>【GameManager】Player.NewGame() called</color>");
         }
         else
         {
             Debug.LogError("<color=red>【GameManager】Player is null!</color>");
         }
-        
+
+        // Clear saved room so Explore loads initial room, not a previous save's room
+        Flags.Set(RoomLoader.CurrentRoomFlagKey, "");
+
         // Ensure we have StateMachine reference (in case Start() hasn't run yet)
         if (StateMachine == null)
         {
@@ -94,8 +108,13 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Save.Load(Flags, Player);
+        Save.Load(Flags, Player, Interactables);
         Inventory?.RaiseInventoryChanged();
+
+        // If already in Explore (e.g. load from pause), apply saved room so we're in the right place
+        string savedRoom = Flags.Get(RoomLoader.CurrentRoomFlagKey, "");
+        if (RoomLoader != null && !string.IsNullOrEmpty(savedRoom))
+            RoomLoader.LoadRoom(savedRoom, null);
 
         if (StateMachine != null)
         {
@@ -114,7 +133,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Save.Save(Flags, Player);
+        Save.Save(Flags, Player, Interactables);
         Debug.Log("<color=cyan>【GameManager】游戏已保存</color>");
     }
 

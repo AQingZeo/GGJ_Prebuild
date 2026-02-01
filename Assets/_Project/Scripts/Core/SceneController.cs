@@ -17,11 +17,14 @@ public class SceneController : MonoBehaviour
     [Header("Overlay Scenes")]
     [SerializeField] private string dialogueSceneName = "DialogueScene";
     [SerializeField] private string cutsceneSceneName = "CutsceneScene";
+    [SerializeField] private string diarySceneName = "DiaryScene";
+
+    [Header("References (assign in Bootstrap)")]
+    [SerializeField] private PauseUIController pauseUIController;
 
     private readonly HashSet<string> overlaysLoaded = new HashSet<string>();
     private string baseSceneLoaded = "";
     private Coroutine currentTransition = null;
-    private PauseUIController pauseUIController;
 
     private void Awake()
     {
@@ -31,7 +34,6 @@ public class SceneController : MonoBehaviour
     private void Start()
     {
         EventBus.Subscribe<GameStateChanged>(OnGameStateChanged);
-        pauseUIController = FindObjectOfType<PauseUIController>();
 
         if (GameStateMachine.Instance != null)
             ApplyState(GameStateMachine.Instance.CurrentState);
@@ -80,12 +82,19 @@ public class SceneController : MonoBehaviour
             StartTransition(TransitionToDialogue());
         else if (state == GameState.CutScene)
             StartTransition(TransitionToCutscene());
+        else if (state == GameState.Diary) 
+            StartTransition(TransitionToDiary());
     }
 
     private IEnumerator TransitionToMenu()
     {
         if (baseSceneLoaded == exploreSceneName)
+        {
+            // Unload additively loaded room so it doesn't persist when we load from save later
+            if (GameManager.Instance?.RoomLoader != null)
+                yield return GameManager.Instance.RoomLoader.UnloadCurrentRoomAsync();
             yield return StartCoroutine(UnloadBaseScene(exploreSceneName));
+        }
         yield return StartCoroutine(UnloadAllOverlays());
         if (baseSceneLoaded != menuSceneName)
             yield return StartCoroutine(LoadBaseScene(menuSceneName));
@@ -117,7 +126,18 @@ public class SceneController : MonoBehaviour
             yield return StartCoroutine(UnloadOverlay(dialogueSceneName));
         yield return StartCoroutine(LoadOverlay(cutsceneSceneName));
     }
+    private IEnumerator TransitionToDiary()
+    {
+        if (baseSceneLoaded != exploreSceneName)
+            yield return StartCoroutine(LoadBaseScene(exploreSceneName));
 
+        if (overlaysLoaded.Contains(dialogueSceneName))
+            yield return StartCoroutine(UnloadOverlay(dialogueSceneName));
+        if (overlaysLoaded.Contains(cutsceneSceneName))
+            yield return StartCoroutine(UnloadOverlay(cutsceneSceneName));
+
+        yield return StartCoroutine(LoadOverlay(diarySceneName));
+    }
     private IEnumerator LoadBaseScene(string sceneName)
     {
         if (string.IsNullOrEmpty(sceneName)) yield break;

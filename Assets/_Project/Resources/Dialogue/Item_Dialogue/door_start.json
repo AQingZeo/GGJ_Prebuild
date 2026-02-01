@@ -1,0 +1,9 @@
+{
+  "dialogueID": "door_start",
+  "nodes": {
+    "start": { 
+      "speaker": "...", 
+      "text": "一扇奇怪的门，没有把手也没有门锁，好像和墙融在一起。"
+    }
+  }
+}
